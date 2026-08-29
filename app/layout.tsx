@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   title: "Cigarrería Megalider | Tu cigarrería de confianza en Engativá",
   description:
     "Descubre nuestra selección premium de licores, snacks y productos de necesidad en Engativá, Bogotá. Calidad, rapidez y confianza.",
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
