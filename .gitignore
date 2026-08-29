@@ -1,6 +1,8 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# ==============================================================================
+# Megalider - .gitignore (Next.js 16+ / TypeScript / Node)
+# ==============================================================================
 
-# dependencies
+# Dependencies
 /node_modules
 /.pnp
 .pnp.*
@@ -10,32 +12,77 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
-
-# next.js
+# Next.js Build & Cache
 /.next/
 /out/
-
-# production
 /build
+/dist
+/.turbo
 
-# misc
-.DS_Store
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Environment Variables & Secrets
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
 *.pem
+*.key
+*.cert
 
-# debug
+# Vercel & Deployment
+.vercel
+.serverless
+
+# Testing & Coverage
+/coverage
+/.nyc_output
+/playwright-report
+/test-results
+
+# Logs & Debugging
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+lerna-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# IDEs & Code Editors
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*~
 
-# vercel
-.vercel
+# Operating System Files
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# AI Agents, Scratch & Local Temporary Files
+.gemini/
+scratch/
