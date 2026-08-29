@@ -7,3 +7,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Project Agent Guidelines & Skills
+- **Next.js AI Coding Standard**: Consultar la skill `.agents/skills/nextjs-coding/SKILL.md` para patrones de App Router, asincronía obligatoria (`params`, `cookies`, `headers`), Server/Client Components y ciclo de verificación.
+- **Brand Guidelines**: Seguir `.agents/skills/megalider-brand/SKILL.md` para colores, tipografías y estética de Cigarrería Megalider.
+- **Token Efficiency**: Seguir `.agents/skills/token-optimization/SKILL.md` para respuestas concisas y optimización de contexto.

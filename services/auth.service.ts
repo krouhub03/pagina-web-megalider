@@ -81,7 +81,7 @@ export async function loginWithCredentials(formData: FormData): Promise<LoginRes
         rol: user.rol,
       },
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error en loginWithCredentials:", error);
     return {
       success: false,

@@ -9,13 +9,17 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const authToken = request.cookies.get("auth_token")?.value;
 
+  let userRole: string | null = null;
   let isAuthenticated = false;
+
   if (authToken) {
     try {
-      await jwtVerify(authToken, secretKey);
+      const { payload } = await jwtVerify(authToken, secretKey);
       isAuthenticated = true;
+      userRole = (payload.rol as string) || null;
     } catch {
       isAuthenticated = false;
+      userRole = null;
     }
   }
 
@@ -27,17 +31,24 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/catalogo") ||
     pathname.startsWith("/usuarios");
 
-  // 1. Redirigir a login si intenta ingresar a una ruta protegida sin sesión
+  // 1. Redirigir a login si intenta ingresar a una ruta administrativa sin sesión
   if (isProtectedAdminRoute && !isAuthenticated) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // 2. Si ya está autenticado e intenta ir a /login, redirigir a /dashboard
+  // 2. Si es un CLIENTE e intenta ingresar a rutas administrativas protegidas, redirigir a inicio
+  if (isProtectedAdminRoute && isAuthenticated && userRole === "CLIENTE") {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  // 3. Si ya está autenticado e intenta ir a /login:
+  // - Si es CLIENTE -> redirigir a inicio (/)
+  // - Si es STAFF (SUPERADMIN, ADMIN, CAJERO) -> redirigir a /dashboard
   if (pathname === "/login" && isAuthenticated) {
-    const dashboardUrl = new URL("/dashboard", request.url);
-    return NextResponse.redirect(dashboardUrl);
+    const destination = userRole === "CLIENTE" ? "/" : "/dashboard";
+    return NextResponse.redirect(new URL(destination, request.url));
   }
 
   return NextResponse.next();

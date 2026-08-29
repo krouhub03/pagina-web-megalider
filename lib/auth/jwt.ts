@@ -8,7 +8,7 @@ export interface UserSessionPayload {
   id: number;
   nombre: string;
   email: string;
-  rol: "SUPERADMIN" | "ADMIN" | "CAJERO";
+  rol: "SUPERADMIN" | "ADMIN" | "CAJERO" | "CLIENTE";
   avatarUrl?: string | null;
 }
 

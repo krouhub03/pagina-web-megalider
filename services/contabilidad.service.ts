@@ -1,5 +1,5 @@
 import { dbPostgres, schema } from "@/lib/db/postgres";
-import { desc, eq, and, gte, lte, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 
 export interface FiltrosFacturas {
   proveedorId?: number;
@@ -33,9 +33,10 @@ export async function getFacturas(filtros: FiltrosFacturas = {}) {
       offset: filtros.offset ?? 0,
     });
     return { success: true, data };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
     console.error("Error al obtener facturas:", error);
-    return { success: false, error: error.message, data: [] };
+    return { success: false, error: message, data: [] };
   }
 }
 
@@ -50,9 +51,10 @@ export async function getFacturaDetalle(facturaId: number) {
       },
     });
     return { success: true, data };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
     console.error(`Error al obtener factura #${facturaId}:`, error);
-    return { success: false, error: error.message, data: null };
+    return { success: false, error: message, data: null };
   }
 }
 
@@ -72,9 +74,10 @@ export async function getEgresosTienda(filtros: FiltrosEgresos = {}) {
       offset: filtros.offset ?? 0,
     });
     return { success: true, data };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
     console.error("Error al obtener egresos:", error);
-    return { success: false, error: error.message, data: [] };
+    return { success: false, error: message, data: [] };
   }
 }
 
@@ -100,7 +103,7 @@ export async function corregirEgreso(params: {
       });
 
       // Actualizar el campo en egresos_tienda si aplica
-      const updateData: Record<string, any> = {};
+      const updateData: Partial<typeof schema.egresosTienda.$inferInsert> = {};
       if (params.campoModificado === "total_egreso") {
         updateData.totalEgreso = params.valorNuevo;
       } else if (params.campoModificado === "descripcion") {
@@ -120,9 +123,10 @@ export async function corregirEgreso(params: {
     });
 
     return result;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
     console.error("Error al corregir egreso:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: message };
   }
 }
 
@@ -160,7 +164,8 @@ export async function getMetricasContables() {
         egresosPorHermes: Number(egresosHermesRes[0]?.conteo || 0),
       },
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
     console.error("Error al obtener métricas contables:", error);
     return {
       success: false,
@@ -171,7 +176,7 @@ export async function getMetricasContables() {
         conteoEgresos: 0,
         egresosPorHermes: 0,
       },
-      error: error.message,
+      error: message,
     };
   }
 }

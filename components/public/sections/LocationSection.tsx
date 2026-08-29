@@ -2,8 +2,7 @@ import React from "react";
 import { MapPin, ExternalLink, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
-const googleMapsUrl =
-  "https://www.google.com/maps/search/?api=1&query=Cl.+86+%2395F-72,+Ciudad+Bachue+I+Etapa,+Engativa,+Bogota";
+const googleMapsUrl = "https://maps.app.goo.gl/6GTj15GraBpt6sFn7";
 
 export default function LocationSection() {
   return (
@@ -28,7 +27,7 @@ export default function LocationSection() {
           <div className="lg:col-span-7 relative min-h-[320px] sm:min-h-[400px] bg-[#A7D9BD]/20 overflow-hidden">
             <iframe
               title="Ubicación Cigarrería Megalider"
-              src="https://maps.google.com/maps?q=Cl.+86+%2395F-72,+Ciudad+Bachue+I+Etapa,+Engativa,+Bogota&t=&z=16&ie=UTF8&iwloc=&output=embed"
+              src="https://maps.google.com/maps?q=4.7146505,-74.1057175&t=&z=17&ie=UTF8&iwloc=&output=embed"
               className="w-full h-full min-h-[320px] border-0"
               loading="lazy"
               allowFullScreen

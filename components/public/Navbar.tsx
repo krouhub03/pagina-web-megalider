@@ -37,9 +37,9 @@ export default function PublicNavbar() {
               variant="outline"
               size="sm"
               leftIcon={<Lock className="w-3.5 h-3.5 text-[#53A677]" />}
-              className="hidden sm:inline-flex text-xs text-slate-700 hover:text-[#067335]"
+              className="inline-flex text-xs text-slate-700 hover:text-[#067335]"
             >
-
+              Iniciar Sesión
             </Button>
           </Link>
 

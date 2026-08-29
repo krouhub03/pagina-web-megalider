@@ -36,36 +36,73 @@ export default function PublicFooter() {
             </span>
           </div>
 
-          {/* Links */}
-          <div className="flex items-center gap-6 text-xs font-medium">
+          {/* Navigation Links */}
+          <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-xs font-medium">
             <Link
               href="/login"
               className="hover:text-white transition-colors duration-200"
             >
               Portal Administrativo
             </Link>
-            <span className="w-1 h-1 rounded-full bg-white/30" />
-            <a
-              href="#categorias"
+            <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-white/30" />
+            <Link
+              href="/#categorias"
               className="hover:text-white transition-colors duration-200"
             >
               Catálogo de Productos
-            </a>
-            <span className="w-1 h-1 rounded-full bg-white/30" />
-            <a
-              href="#ubicacion"
+            </Link>
+            <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-white/30" />
+            <Link
+              href="/#ubicacion"
               className="hover:text-white transition-colors duration-200"
             >
               Ubicación y Horario
-            </a>
+            </Link>
+          </div>
+
+          {/* Legal Links (Google OAuth & Regulatory requirement) */}
+          <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-[11px] text-[#A7D9BD]">
+            <Link
+              href="/politica-de-privacidad"
+              className="hover:text-white underline underline-offset-2 transition-colors duration-200"
+            >
+              Política de Privacidad
+            </Link>
+            <span className="w-1 h-1 rounded-full bg-white/30" />
+            <Link
+              href="/terminos-y-condiciones"
+              className="hover:text-white underline underline-offset-2 transition-colors duration-200"
+            >
+              Términos y Condiciones
+            </Link>
           </div>
 
           {/* Divider */}
-          <div className="w-24 h-px bg-gradient-to-r from-transparent via-[#A7D9BD]/40 to-transparent" />
+          <div className="w-32 h-px bg-gradient-to-r from-transparent via-[#A7D9BD]/40 to-transparent" />
 
-
+          {/* Legal Notice & Copyright */}
+          <div className="text-center space-y-1.5 text-[11px] text-white/60">
+            <p>
+              Cl. 86 #95F-72, Bachué I Etapa, Engativá, Bogotá, Colombia.
+            </p>
+            <p>
+              © {new Date().getFullYear()} Cigarrería Megalider. Todos los derechos reservados.
+            </p>
+            <p className="text-white/50 pt-0.5">
+              Desarrollado por{" "}
+              <a
+                href="https://krouhub.com/"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="font-medium text-[#A7D9BD] hover:text-white transition-colors duration-200 underline underline-offset-2"
+              >
+                KrouHub
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>
   );
 }
+

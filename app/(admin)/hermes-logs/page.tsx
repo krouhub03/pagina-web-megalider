@@ -5,12 +5,15 @@ import { desc } from "drizzle-orm";
 import { Bot, History, ArrowRight, UserCheck } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
+type CorreccionWithEgreso = typeof schema.historialCorrecciones.$inferSelect & {
+  egreso?: typeof schema.egresosTienda.$inferSelect | null;
+};
+
 export default async function HermesLogsPage() {
-  let correcciones: any[] = [];
+  let correcciones: CorreccionWithEgreso[] = [];
   try {
     correcciones = await dbPostgres.query.historialCorrecciones.findMany({
       orderBy: [desc(schema.historialCorrecciones.corregidoEn)],

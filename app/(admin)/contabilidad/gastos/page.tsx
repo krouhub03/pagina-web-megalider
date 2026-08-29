@@ -2,7 +2,6 @@ import React from "react";
 import Link from "next/link";
 import { getEgresosTienda } from "@/services/contabilidad.service";
 import { Wallet, Search, Bot, User, CheckCircle2, History, Calendar } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";

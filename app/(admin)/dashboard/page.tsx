@@ -6,12 +6,10 @@ import {
   Bot,
   ArrowUpRight,
   PackageCheck,
-  Building2,
-  Calendar,
 } from "lucide-react";
 import { getMetricasContables } from "@/services/contabilidad.service";
 import { Button } from "@/components/ui/Button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { formatCurrency } from "@/lib/utils";
 

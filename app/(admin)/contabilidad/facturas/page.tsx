@@ -1,8 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { getFacturas } from "@/services/contabilidad.service";
-import { Receipt, Search, Building2, Calendar, FileSpreadsheet } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Receipt, Search, Building2, Calendar } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
