@@ -23,6 +23,9 @@ Este directorio contiene los planes de prueba, matrices de validación y los res
 | **CP-13** | Seguridad en Handlers BFF | BFF / API | Enviar petición con redirección externa maliciosa a `/api/auth/google/callback`. | Bloqueo por validación de origen (`destination.origin !== origin`) retornando HTTP 400. | ✅ PASÓ |
 | **CP-14** | Lazy Loading de Recursos Pesados | Rendimiento | Inspeccionar carga de iframe en `LocationSection` y recursos gráficos. | Carga diferida con atributo `loading="lazy"` sin penalizar el FCP inicial. | ✅ PASÓ |
 | **CP-15** | Validación de Paleta e Identidad | Diseño / UI | Inspeccionar tokens CSS y clases Tailwind en `app/globals.css`. | Cumplimiento del 100% de los códigos hex oficiales (`#067335`, `#038C3E`, `#53A677`, `#A7D9BD`, `#F2F2F2`). | ✅ PASÓ |
+| **CP-16** | Registro de Cliente y Políticas de Datos | Autenticación | Enviar formulario en `/register` con políticas aceptadas y contraseñas válidas. | Inserción en MySQL con rol `CLIENTE`, emisión de JWT y redirección a `/`. | ✅ PASÓ |
+| **CP-17** | Verificación de Google reCAPTCHA v2 | Seguridad | Enviar formulario de registro con token de reCAPTCHA. | Validación del token con Google siteverify y bloqueo si el token es nulo o inválido. | ✅ PASÓ |
+| **CP-18** | Prevención de Correo Duplicado | Autenticación | Intentar registrar un correo electrónico ya existente en la base de datos. | Mensaje de error claro "Ya existe una cuenta registrada con este correo" sin duplicar filas. | ✅ PASÓ |
 
 ---
 

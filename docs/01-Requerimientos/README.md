@@ -35,6 +35,7 @@ Desarrollar una plataforma integral para Cigarrería Megalider compuesta por una
 ### Módulo de Métricas e Inventario
 * **HU-08:** *Como administrador*, quiero ver un resumen ejecutivo (KPIs) del total de compras, egresos del mes y balance operativo para tomar decisiones financieras rápidas.
 * **HU-09:** *Como usuario*, quiero navegar por la landing pública y ver el horario de atención, marcas destacadas y la ubicación exacta del local en Engativá.
+* **HU-10:** *Como cliente nuevo*, quiero registrarme en una página independiente (`/register`), aceptando los términos y políticas de datos personales y validando la seguridad con reCAPTCHA para crear mi cuenta de forma transparente.
 
 ---
 
@@ -50,6 +51,7 @@ Desarrollar una plataforma integral para Cigarrería Megalider compuesta por una
 | **CU-06** | Consultar Catálogo | Todos los roles | Acceso libre o autenticado | Listado de productos clasificados por categoría. |
 | **CU-07** | Cerrar Sesión | Usuario autenticado | Sesión activa | Eliminación de cookie `auth_token` y redirección a `/login`. |
 | **CU-08** | Consumo de Endpoints BFF / APIs | Clientes API / Frontend | Petición HTTP a Route Handler | Respuesta estructurada (JSON, XML o Markdown) con cabeceras de seguridad. |
+| **CU-09** | Registro de Nuevo Cliente con reCAPTCHA | Cliente no registrado | Formulario diligenciado, políticas aceptadas y captcha resuelto | Creación en MySQL (`rol: CLIENTE`), emisión de JWT y redirección a `/`. |
 
 ---
 

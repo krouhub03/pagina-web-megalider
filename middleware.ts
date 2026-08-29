@@ -43,10 +43,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // 3. Si ya está autenticado e intenta ir a /login:
+  // 3. Si ya está autenticado e intenta ir a /login o /register:
   // - Si es CLIENTE -> redirigir a inicio (/)
   // - Si es STAFF (SUPERADMIN, ADMIN, CAJERO) -> redirigir a /dashboard
-  if (pathname === "/login" && isAuthenticated) {
+  if ((pathname === "/login" || pathname === "/register") && isAuthenticated) {
     const destination = userRole === "CLIENTE" ? "/" : "/dashboard";
     return NextResponse.redirect(new URL(destination, request.url));
   }
@@ -63,5 +63,6 @@ export const config = {
     "/catalogo/:path*",
     "/usuarios/:path*",
     "/login",
+    "/register",
   ],
 };

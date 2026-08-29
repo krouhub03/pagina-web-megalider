@@ -26,7 +26,7 @@ export const usuarios = mysqlTable(
     passwordHash: varchar("password_hash", { length: 255 }),
     googleId: varchar("google_id", { length: 255 }),
     avatarUrl: varchar("avatar_url", { length: 500 }),
-    rol: roleEnum.default("ADMIN").notNull(),
+    rol: roleEnum.default("CLIENTE").notNull(),
     activo: boolean("activo").default(true).notNull(),
     creadoEn: timestamp("creado_en").defaultNow().notNull(),
     actualizadoEn: timestamp("actualizado_en").defaultNow().onUpdateNow().notNull(),
