@@ -13,3 +13,5 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - **Brand Guidelines**: Seguir `.agents/skills/megalider-brand/SKILL.md` para colores, tipografías y estética de Cigarrería Megalider.
 - **Token Efficiency**: Seguir `.agents/skills/token-optimization/SKILL.md` para respuestas concisas y optimización de contexto.
 - **Analytics & Web Vitals**: Seguir `.agents/skills/nextjs-analytics/SKILL.md` para implementación de Core Web Vitals, instrumentación de cliente (`instrumentation-client.ts`), reportes no bloqueantes y telemetría de eventos.
+- **Lazy Loading & Dynamic Imports**: Consultar la skill `.agents/skills/nextjs-lazy-loading/SKILL.md` para patrones de carga diferida con `next/dynamic`, `React.lazy`, deshabilitación segura de SSR (`ssr: false`), importación de librerías bajo demanda y magic comments.
+- **Backend for Frontend (BFF) & APIs**: Consultar la skill `.agents/skills/nextjs-bff/SKILL.md` para arquitectura BFF, Route Handlers (`route.ts`), webhooks, negociación de contenido, proxying seguro y reglas de fetching interno.

@@ -1,6 +1,6 @@
 # 03 - Manual Técnico e Instrucciones de Instalación
 
-Este documento contiene las especificaciones técnicas del stack, la configuración de variables de entorno, la integración de Google OAuth 2.0 y los pasos de instalación y ejecución.
+Este documento contiene las especificaciones técnicas del stack, la configuración de variables de entorno, la integración de Google OAuth 2.0, la compatibilidad con **Cache Components** y los pasos de instalación y ejecución.
 
 ---
 
@@ -15,6 +15,7 @@ Este documento contiene las especificaciones técnicas del stack, la configuraci
 | **Driver PostgreSQL** | `postgres` (postgres.js) | `^3.4.5` | Pool de conexiones a la BD de Hermes IA. |
 | **Driver MySQL** | `mysql2` | `^3.14.0` | Pool de conexiones a la BD de usuarios y catálogo. |
 | **Criptografía & Auth** | `jose` & `bcryptjs` | `^6.0.8` / `^3.0.2` | Firma de tokens JWT en Edge y hash de contraseñas. |
+| **Aislamiento Servidor** | `server-only` | `^0.0.1` | Garantiza que funciones criptográficas y DAL nunca se ejecuten en el cliente. |
 | **Proveedor OAuth** | Google OAuth 2.0 | API v3 | Autenticación federada segura sin contraseñas. |
 | **Iconografía** | `lucide-react` | `^1.35.0` | Iconos vectoriales para toda la UI. |
 
@@ -110,3 +111,72 @@ Para habilitar el login con Google en entornos locales y de producción:
 2. **Cookies Seguras:** La cookie `auth_token` tiene flags `HttpOnly`, `SameSite=Lax` y `Secure` en producción.
 3. **Control RBAC en Edge:** El [`middleware.ts`](../../middleware.ts) intercepta peticiones a rutas administrativas y valida el rol del token antes de renderizar la página. Si un usuario con rol `CLIENTE` intenta acceder al dashboard, es redirigido inmediatamente a `/`.
 4. **Protección CSRF en OAuth:** Validación estricta del parámetro `state` almacenado en cookies temporales de 10 minutos de vida.
+
+---
+
+## ⚡ 7. Alineación con Estándares Next.js (Authentication & Cache Components)
+
+El sistema cumple rigurosamente con las dos guías oficiales de autenticación de Next.js:
+
+1. **[Next.js Authentication Guide](https://nextjs.org/docs/app/guides/authentication):**
+   * **Server Actions & Route Handlers:** Procesamiento 100% en el servidor sin exponer credenciales.
+   * **Asincronía en Next.js 16:** Invocación asíncrona de `await cookies()`.
+   * **Optimistic Checks en Middleware:** Comprobaciones rápidas del JWT en Edge sin llamadas a bases de datos para no degradar el prefetching.
+   * **Data Access Layer (DAL) & DTOs:** Centralización del usuario en [`lib/auth/jwt.ts`](../../lib/auth/jwt.ts) protegido con `import 'server-only'` y emisión de datos públicos limpios sin contraseñas.
+
+2. **[Authentication with Cache Components Guide](https://nextjs.org/docs/app/guides/authentication-with-cache-components):**
+   * **Límites de Suspense:** Los accesos a parámetros dinámicos (`searchParams` o cookies) están encapsulados en componentes bajo `<Suspense>`, preservando el shell estático.
+   * **Push Dynamic Access Down:** Los layouts principales (ej. [`app/(admin)/layout.tsx`](../../app/(admin)/layout.tsx)) no realizan llamadas bloqueantes a `cookies()` en su raíz, permitiendo el streaming inmediato de la UI.
+   * **Reglas de Caché Segura:** Las directivas de caché nunca leen cookies directamente en `use cache` plano; para sesiones privadas se emplea el scope del cliente (`use cache: private`) y para caché del servidor se extrae exclusivamente el `userId` en `cacheTag`.
+
+---
+
+## 🌐 8. Manual Técnico de Backend for Frontend (BFF) & Route Handlers
+
+* **Convención de Archivo:** `app/**/route.ts` manejando métodos `GET`, `POST`, `PUT`, `DELETE`, etc.
+* **Resolución de Parámetros Asíncronos (Next.js 16+):**
+  ```ts
+  export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    // ...
+  }
+  ```
+* **Lectura de Payloads:** Métodos `request.json()`, `request.formData()` y clonación `request.clone()` para relecturas seguras.
+* **Seguridad:**
+  - Prevención de *Open Redirects* mediante comprobación de origen `destination.origin === request.nextUrl.origin`.
+  - Validación de firmas/secretos en webhooks de revalidación (`revalidateTag`).
+
+---
+
+## ⚡ 9. Guía Técnica de Lazy Loading & Code Splitting
+
+* **Componentes Dinámicos:** Utilización de `next/dynamic` para componentes pesados y modales condicionales:
+  ```tsx
+  const CartDrawer = dynamic(() => import('@/components/cart/cart-drawer'), {
+    loading: () => <SkeletonLoader />,
+  });
+  ```
+* **Desactivación de SSR:** La opción `{ ssr: false }` está estrictamente reservada para Client Components (`'use client'`). Prohibido su uso en Server Components.
+* **Importación de Módulos Bajo Demanda:** Librerías de procesamiento como `fuse.js` se cargan dentro del handler de evento con `const Fuse = (await import('fuse.js')).default`.
+* **Magic Comments:** Compatibilidad con `/* webpackIgnore: true */`, `/* turbopackIgnore: true */` y `/* turbopackOptional: true */`.
+
+---
+
+## 📊 10. Instrumentación y Medición de Core Web Vitals
+
+* **Componente de Aislamiento:** Implementado en `app/_components/web-vitals.tsx` con directiva `'use client'`, garantizando que `RootLayout` se mantenga como Server Component.
+* **Métricas Rastreadas:** TTFB, FCP, LCP (< 2.5s), CLS (< 0.1), INP (< 200ms).
+* **Envío No Bloqueante:** Implementación mediante `navigator.sendBeacon('/api/analytics', payload)` o fallback a `fetch(..., { keepalive: true })`.
+
+---
+
+## 🤖 11. Estándares de Agentes IA y Optimización de Tokens
+
+* **Directivas de Contexto:** Código modular, reducción de ruido sintáctico, tipado estricto con TypeScript 5+.
+* **Skills Indexadas en el Proyecto:**
+  - [`nextjs-coding`](../../.agents/skills/nextjs-coding/SKILL.md)
+  - [`megalider-brand`](../../.agents/skills/megalider-brand/SKILL.md)
+  - [`token-optimization`](../../.agents/skills/token-optimization/SKILL.md)
+  - [`nextjs-analytics`](../../.agents/skills/nextjs-analytics/SKILL.md)
+  - [`nextjs-lazy-loading`](../../.agents/skills/nextjs-lazy-loading/SKILL.md)
+  - [`nextjs-bff`](../../.agents/skills/nextjs-bff/SKILL.md)

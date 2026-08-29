@@ -25,7 +25,8 @@ graph TD
         Components["Design System UI (Button, Card, Badge, Input)"]
     end
 
-    subgraph DataAccessLayer ["Capa Multi-BD (Drizzle ORM)"]
+    subgraph DataAccessLayer ["Capa Multi-BD & DAL (server-only)"]
+        DAL["Auth DAL (lib/auth/jwt.ts)"]
         PGClient["Postgres Client (drizzle-orm/postgres-js)"]
         MySQLClient["MySQL Client (drizzle-orm/mysql2)"]
     end
@@ -45,8 +46,10 @@ graph TD
     AdminViews --> Components
     AdminViews --> ServerActions
     OAuthRoutes --> MySQLClient
+    ServerActions --> DAL
     ServerActions --> PGClient
     ServerActions --> MySQLClient
+    DAL --> MySQLClient
     PGClient --> DB_PG
     MySQLClient --> DB_MySQL
     HermesAgent --> DB_PG
@@ -163,3 +166,56 @@ sequenceDiagram
 ### Tipografía
 * **Títulos y Encabezados:** `Playfair Display` (serif elegante y tradicional).
 * **Textos e Interfaz:** `Plus Jakarta Sans` (sans-serif moderna y altamente legible).
+
+---
+
+## 🛡️ 5. Patrón Data Access Layer (DAL) & Cache Components
+
+Para cumplir con la arquitectura de **Cache Components**:
+
+1. **Aislamiento Seguro (`server-only`):** La lógica de validación criptográfica y tokens en [`lib/auth/jwt.ts`](../../lib/auth/jwt.ts) está encapsulada para evitar que cualquier secreto o helper llegue al bundle del navegador.
+2. **Push Dynamic Access Down (Streaming no bloqueante):** Los `layouts` no ejecutan llamadas bloqueantes a `cookies()` en su raíz. Las lecturas dinámicas se delegan a componentes específicos envueltos en `<Suspense>`, permitiendo que el shell estático se transmita de forma instantánea al cliente.
+3. **Data Transfer Objects (DTO):** Las respuestas y sesiones solo exponen campos públicos (`id`, `nombre`, `email`, `rol`, `avatarUrl`), garantizando que datos sensibles como `password_hash` nunca sean transferidos al cliente.
+
+---
+
+## 🔌 6. Arquitectura Backend for Frontend (BFF)
+
+El patrón BFF en Next.js desacopla la UI de los servicios y bases de datos internos:
+
+```
+[Cliente Web / Móvil / Agentes IA]
+              │
+    (HTTPS / REST / OAuth)
+              ▼
+┌──────────────────────────────────────────────┐
+│       Next.js App Router (BFF Layer)         │
+│  - Route Handlers (`app/api/**/route.ts`)    │
+│  - Middleware / Proxy (`middleware.ts`)      │
+│  - Negociación de Contenido (`Vary: Accept`) │
+│  - Sanitización & Validación de Esquema      │
+└──────┬───────────────────────────────┬───────┘
+       │                               │
+       ▼                               ▼
+ [PostgreSQL: Hermes IA]      [MySQL: Tienda & Usuarios]
+```
+
+- **Regla de Separación:** Los Server Components leen directamente de las capas de base de datos (`lib/db/`), mientras que los Route Handlers atienden peticiones externas, OAuth, webhooks y clientes que requieren formatos específicos (JSON, XML, Markdown).
+
+---
+
+## ⚡ 7. Estrategia de Lazy Loading & Optimización de Bundle
+
+1. **Server Components por Defecto:** Se dividen automáticamente en fragmentos (*code-splitting*) en el servidor y se transmiten mediante *streaming*.
+2. **Client Components Bajo Demanda (`next/dynamic`):**
+   - Modales (verificación de edad, filtros avanzados, drawers de carrito).
+   - Componentes interactivos dependientes de APIs de navegador con `{ ssr: false }` exclusivo en Client Components.
+   - Placeholders visuales (`loading: () => <Skeleton />`) para garantizar estabilidad visual (CLS = 0).
+3. **Librerías Externas (`import()` dinámico):** Carga en diferido de herramientas pesadas (búsqueda difusa `fuse.js`, generadores de recibos PDF, exportadores Excel) solo al desencadenar la acción.
+
+---
+
+## 📈 8. Medición de Rendimiento y Core Web Vitals
+
+- **Límites de Cliente Aislados:** Telemetría instrumentada en componentes cliente dedicados (`useReportWebVitals`) sin convertir páginas o layouts en Client Components.
+- **Envío No Bloqueante:** Uso prioritario de `navigator.sendBeacon()` o `fetch(..., { keepalive: true })` para garantizar la entrega de métricas sin impactar el hilo principal de renderizado.

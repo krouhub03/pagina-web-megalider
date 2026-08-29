@@ -49,3 +49,14 @@ Desarrollar una plataforma integral para Cigarrería Megalider compuesta por una
 | **CU-05** | Modificar Egreso | Admin / Superadmin | Sesión activa con rol Staff | Actualización en `egresos_tienda` + inserción en `historial_correcciones`. |
 | **CU-06** | Consultar Catálogo | Todos los roles | Acceso libre o autenticado | Listado de productos clasificados por categoría. |
 | **CU-07** | Cerrar Sesión | Usuario autenticado | Sesión activa | Eliminación de cookie `auth_token` y redirección a `/login`. |
+| **CU-08** | Consumo de Endpoints BFF / APIs | Clientes API / Frontend | Petición HTTP a Route Handler | Respuesta estructurada (JSON, XML o Markdown) con cabeceras de seguridad. |
+
+---
+
+## ⚡ Requerimientos No Funcionales (RNF)
+
+1. **RNF-01 (Rendimiento y Web Vitals):** El portal debe mantener un Largest Contentful Paint (LCP) inferior a 2.5s y un Cumulative Layout Shift (CLS) inferior a 0.1, mediante lazy loading de recursos pesados e imágenes optimizadas con `next/image`.
+2. **RNF-02 (Carga Diferida - Lazy Loading):** Los componentes debajo del pliegue (ej. mapas de Google Maps, modales y drawers) y librerías externas pesadas deben diferir su carga con `next/dynamic` o `import()` bajo demanda para minimizar el bundle inicial de JavaScript.
+3. **RNF-03 (Seguridad en Endpoints BFF):** Los Route Handlers públicos deben implementar protección contra redirecciones abiertas (*Open Redirects*), validación estricta de esquemas y evitar llamadas circulares de `fetch()` desde Server Components.
+4. **RNF-04 (Identidad Institucional):** Todo el diseño debe apegarse a la guía de marca de Cigarrería Megalider (paleta de verdes `#067335`, `#038C3E`, `#53A677`, `#A7D9BD`, tipografías `Playfair Display` y `Plus Jakarta Sans`).
+5. **RNF-05 (Eficiencia de Tokens para IA):** El código y los prompts deben optimizar el contexto, evitando redundancias y aplicando directivas de alta densidad.
