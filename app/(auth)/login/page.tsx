@@ -76,8 +76,7 @@ function LoginForm() {
             type="email"
             label="Correo Electrónico"
             required
-            placeholder="admin@megalider.com"
-            defaultValue="admin@megalider.com"
+            placeholder="ejemplo@gmail.com"
             leftIcon={<Mail className="w-4 h-4" />}
           />
 
@@ -88,7 +87,6 @@ function LoginForm() {
             label="Contraseña"
             required
             placeholder="••••••••"
-            defaultValue="Megalider2026*"
             leftIcon={<Lock className="w-4 h-4" />}
             rightIcon={
               <button

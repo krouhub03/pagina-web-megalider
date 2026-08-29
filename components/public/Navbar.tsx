@@ -23,8 +23,8 @@ export default function PublicNavbar() {
             />
           </div>
           <div className="flex flex-col">
-            <span className="font-serif font-bold text-lg sm:text-xl text-[#067335] leading-tight tracking-tight">
-              Cigarrería Megalider
+            <span className="font-serif font-bold text-2xl sm:text-3xl text-[#067335] leading-tight tracking-tight">
+              MEGALIDER
             </span>
           </div>
         </Link>

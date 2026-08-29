@@ -51,7 +51,7 @@ export default function HeroSection() {
                 <span className="absolute -bottom-1 left-0 right-0 h-3 bg-[#A7D9BD]/30 rounded-full blur-sm" />
               </span>
               , <br className="hidden sm:inline" />
-              ahora más cerca en Engativá
+              ahora más cerca
             </h1>
 
             {/* Subtitle */}
