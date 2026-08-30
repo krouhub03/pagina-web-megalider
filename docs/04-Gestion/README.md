@@ -1,56 +1,11 @@
 # 04 - Gestión del Proyecto y Cronograma
 
-Este directorio almacena el cronograma de ejecución, el seguimiento de fases, el estado de los entregables y los reportes de progreso de **Cigarrería Megalider**.
+Este módulo contiene el seguimiento de fases del proyecto, el cronograma de ejecución en formato Gantt, el estado actual de los entregables y las actas de decisiones de arquitectura.
 
 ---
 
-## 📅 Cronograma y Roadmap de Fases
+## 📑 Contenido del Módulo
 
-```mermaid
-gantt
-    title Roadmap de Desarrollo - Cigarrería Megalider
-    dateFormat  YYYY-MM-DD
-    section Fase 1: Arquitectura & Multi-BD
-    Conexión Postgres (Hermes) & MySQL  :done, 2026-08-28, 1d
-    Esquemas Drizzle ORM                :done, 2026-08-28, 1d
-    Design System & Botones Estándar    :done, 2026-08-28, 1d
-    section Fase 2: Autenticación & Layout
-    Sistema JWT + Cookies HttpOnly      :done, 2026-08-28, 1d
-    Google OAuth 2.0 & Portal Unificado :done, 2026-08-29, 1d
-    Control RBAC (Staff vs Clientes)    :done, 2026-08-29, 1d
-    Modularización Landing Pública      :done, 2026-08-29, 1d
-    section Fase 3: Dashboard & Hermes
-    Vistas Facturas, Egresos & Auditoría :done, 2026-08-28, 1d
-    Modales interactivos de edición      :active, 2026-08-29, 3d
-    Reportes avanzados y exportación CSV :2026-09-01, 3d
-    section Fase 4: E-commerce
-    Catálogo de productos activo         :2026-09-04, 5d
-    Carrito y pasarela de pagos          :2026-09-09, 7d
-```
-
----
-
-## 📊 Estado de los Entregables
-
-| Entregable | Módulo / Área | Estado | Observaciones |
-| :--- | :--- | :--- | :--- |
-| **Landing Pública** | Frontend Público | ✅ Completado | Separado en Navbar, Footer y 4 secciones independientes con botón de acceso activo. |
-| **Integración Hermes IA** | Backend Postgres | ✅ Completado | Conexión en tiempo real con facturas, items y egresos. |
-| **Portal Unificado de Auth** | Seguridad / Auth | ✅ Completado | Login unificado con credenciales y Google OAuth 2.0 integrado con MySQL. |
-| **Control de Acceso RBAC** | Seguridad / Edge | ✅ Completado | Separación de roles: Staff (`SUPERADMIN`, `ADMIN`, `CAJERO`) al Dashboard, `CLIENTE` a Inicio (`/`). |
-| **Registro de Clientes & reCAPTCHA** | Seguridad / Auth | ✅ Completado | Página `/register` independiente, modal de políticas Ley 1581 y verificación Google reCAPTCHA v2. |
-| **Design System UI** | Frontend UI | ✅ Completado | Componentes `Button`, `Input`, `Card`, `Badge` estandarizados. |
-| **Skills de IA & Coding Standards** | Ecosistema / Agentes | ✅ Completado | 6 skills implementadas (`nextjs-coding`, `megalider-brand`, `token-optimization`, `nextjs-analytics`, `nextjs-lazy-loading`, `nextjs-bff`). |
-| **Auditoría Next.js 16+** | Calidad / Build | ✅ Completado | Compilación Turbopack exitosa (12/12 rutas) y cero errores TypeScript. |
-| **Modales de Corrección** | Contabilidad | ⏳ En Progreso | Interfaz para editar egresos y registrar motivo en auditoría. |
-| **Catálogo E-commerce** | Catálogo / Tienda | 📅 Planificado | CRUD de productos y sincronización de stock. |
-
----
-
-## 📝 Resumen de Actas y Decisiones Clave
-
-1. **Portal Unificado con Redirección Inteligente RBAC:** Se unificó el inicio de sesión para todo tipo de usuarios en `/login`, garantizando que cualquier usuario externo que se registre mediante Google reciba el rol de menor privilegio (`CLIENTE`) y sea enviado a la tienda pública (`/`), protegiendo de forma transparente el acceso al panel administrativo.
-2. **Separación de Login y Registro:** Se creó la ruta `/register` para una experiencia de onboarding clara con verificación humana de reCAPTCHA y aceptación explícita de la política de tratamiento de datos personales conforme a la legislación colombiana (Ley 1581 de 2012).
-3. **Decisión Multi-BD:** Se optó por **Drizzle ORM** para permitir consultas simultáneas a PostgreSQL (Hermes) y MySQL (tienda) sin generar sobrecarga ni múltiples binarios.
-4. **Estrategia de Auditoría:** Se vinculó el flujo de edición a la tabla existente `historial_correcciones` para garantizar que nunca se sobreescriba un dato de Hermes sin dejar registro del valor anterior y el responsable.
-5. **Adopción de AI Coding Standards:** Se formalizaron skills de agentes para garantizar que cualquier desarrollo futuro respete los contratos de marca, patrones BFF, lazy loading y optimización de contexto.
+1. 📅 [**01 - Roadmap y Cronograma**](./01-Roadmap-y-Cronograma.md): Diagrama de Gantt Mermaid con las fases de desarrollo.
+2. 📊 [**02 - Estado de los Entregables**](./02-Estado-de-Entregables.md): Matriz de estado de avance por módulo y entregable.
+3. 📝 [**03 - Actas y Decisiones Clave (ADRs)**](./03-Actas-y-Decisiones.md): Registro de decisiones arquitectónicas y actas de acuerdos.

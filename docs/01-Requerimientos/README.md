@@ -1,72 +1,12 @@
 # 01 - Requerimientos del Sistema
 
-Este directorio contiene los objetivos del proyecto, casos de uso del sistema e historias de usuario para el portal público, el portal de acceso unificado y el dashboard administrativo de **Cigarrería Megalider**.
+Este módulo define los objetivos estratégicos, las historias de usuario, los casos de uso del sistema y los requerimientos no funcionales de la plataforma de **Cigarrería Megalider**.
 
 ---
 
-## 🎯 Definición de Objetivos
+## 📑 Contenido del Módulo
 
-### Objetivo General
-Desarrollar una plataforma integral para Cigarrería Megalider compuesta por una **Landing Page pública** moderna e informativa, un **Portal Unificado de Autenticación con Google OAuth 2.0 y RBAC**, un **Panel de Administración Interno (Dashboard)** conectado a múltiples bases de datos para auditar y gestionar las operaciones contables de **Hermes IA**, y preparar la infraestructura para el futuro **E-commerce**.
-
-### Objetivos Específicos
-1. **Presencia Digital y Geolocalización:** Proveer a los clientes en Engativá información sobre horarios, contacto, categorías de productos y cómo llegar vía Google Maps.
-2. **Autenticación Unificada y Segura (OAuth 2.0 + RBAC):** Permitir el acceso tanto a personal interno como a clientes externos mediante credenciales o cuenta de Google, enrutando a cada usuario según su rol (`SUPERADMIN`, `ADMIN`, `CAJERO`, `CLIENTE`).
-3. **Supervisión de Hermes IA:** Permitir a los administradores revisar, corregir y auditar en tiempo real las facturas de proveedores y los egresos de caja registrados por el bot en PostgreSQL.
-4. **Trazabilidad y Auditoría:** Guardar en `historial_correcciones` cualquier modificación manual sobre registros generados automáticamente por la IA.
-5. **Control de Acceso Basado en Roles (RBAC):** Garantizar la seguridad mediante middleware Edge, tokens JWT con cookies HttpOnly y delimitación estricta de rutas administrativas.
-6. **Catálogo Preparado para E-commerce:** Estructurar los productos en las 4 categorías oficiales de Megalider.
-
----
-
-## 👤 Historias de Usuario (User Stories)
-
-### Módulo de Autenticación y Seguridad
-* **HU-01:** *Como administrador*, quiero iniciar sesión con mi correo y contraseña para acceder de forma segura al panel de gestión interna.
-* **HU-02:** *Como usuario (personal o cliente)*, quiero iniciar sesión con mi cuenta de Google mediante un solo clic para acceder de forma ágil y segura.
-* **HU-03:** *Como cliente externo*, quiero que al autenticarme con Google se me cree una cuenta con rol `CLIENTE` y se me redirija a la página principal de la tienda.
-* **HU-04:** *Como superadministrador*, quiero gestionar usuarios y asignar roles (`SUPERADMIN`, `ADMIN`, `CAJERO`, `CLIENTE`) para delimitar las acciones del personal y proteger datos financieros confidenciales.
-
-### Módulo de Contabilidad y Hermes IA
-* **HU-05:** *Como administrador*, quiero visualizar el listado de facturas de compras con su desglose de impuestos (IVA, Impoconsumo, CUFE) para controlar el abastecimiento de mercancía.
-* **HU-06:** *Como administrador*, quiero revisar los egresos de caja registrados por Hermes Bot y modificarlos si contienen errores de extracción, dejando constancia del motivo de corrección.
-* **HU-07:** *Como auditor*, quiero consultar un registro cronológico de todas las correcciones manuales hechas a los egresos de Hermes para mantener la transparencia contable.
-* **HU-11:** *Como administrador*, quiero ver el detalle completo de cada factura de compra con su desglose de impuestos, proveedor, adquiriente y líneas de producto en una tabla scrollable con sticky header.
-* **HU-12:** *Como administrador*, quiero corregir los datos administrativos (N° factura, CUFE, fechas) y las líneas de producto (descripción, cantidad, costo unitario, impuestos) recalculando automáticamente los totales acumulados en PostgreSQL.
-* **HU-13:** *Como administrador*, quiero eliminar facturas de compra obsoletas o duplicadas con confirmación modal de seguridad y eliminación en cascada de sus ítems asociados.
-* **HU-14:** *Como usuario del panel*, quiero buscar y filtrar reactivamente en tiempo real las facturas de compra por N° de factura, CUFE o proveedor usando Zustand sin recargar la página.
-
-### Módulo de Métricas e Inventario
-* **HU-08:** *Como administrador*, quiero ver un resumen ejecutivo (KPIs) del total de compras, egresos del mes y balance operativo para tomar decisiones financieras rápidas.
-* **HU-09:** *Como usuario*, quiero navegar por la landing pública y ver el horario de atención, marcas destacadas y la ubicación exacta del local en Engativá.
-* **HU-10:** *Como cliente nuevo*, quiero registrarme en una página independiente (`/register`), aceptando los términos y políticas de datos personales y validando la seguridad con reCAPTCHA para crear mi cuenta de forma transparente.
-
----
-
-## 📋 Matriz de Casos de Uso
-
-| ID | Caso de Uso | Actor Principal | Precondición | Resultado |
-| :--- | :--- | :--- | :--- | :--- |
-| **CU-01** | Iniciar Sesión con Credenciales | Staff / Admin | Usuario activo en MySQL con password | Generación de cookie JWT y redirección según rol. |
-| **CU-02** | Iniciar Sesión con Google OAuth | Cualquier Usuario | Cuenta de Google activa | Sincronización en MySQL, emisión de JWT y enrutamiento RBAC (`/` para clientes, `/dashboard` para staff). |
-| **CU-03** | Control de Acceso RBAC | Cliente Externo | Sesión activa con rol `CLIENTE` | Bloqueo en middleware ante rutas `/dashboard` o `/contabilidad` y redirección forzada a `/`. |
-| **CU-04** | Consultar Facturas | Admin / Superadmin | Sesión activa con rol Staff | Lectura de facturas e items en PostgreSQL. |
-| **CU-05** | Modificar Egreso | Admin / Superadmin | Sesión activa con rol Staff | Actualización en `egresos_tienda` + inserción en `historial_correcciones`. |
-| **CU-06** | Consultar Catálogo | Todos los roles | Acceso libre o autenticado | Listado de productos clasificados por categoría. |
-| **CU-07** | Cerrar Sesión | Usuario autenticado | Sesión activa | Eliminación de cookie `auth_token` y redirección a `/login`. |
-| **CU-08** | Consumo de Endpoints BFF / APIs | Clientes API / Frontend | Petición HTTP a Route Handler | Respuesta estructurada (JSON, XML o Markdown) con cabeceras de seguridad. |
-| **CU-09** | Registro de Nuevo Cliente con reCAPTCHA | Cliente no registrado | Formulario diligenciado, políticas aceptadas y captcha resuelto | Creación en MySQL (`rol: CLIENTE`), emisión de JWT y redirección a `/`. |
-| **CU-10** | Ver Detalle de Factura | Admin / Superadmin | Factura registrada en PostgreSQL | Vista completa `/contabilidad/facturas/[id]` con tarjetas de emisor/receptor, CUFE compacto y tabla de ítems con `tfoot`. |
-| **CU-11** | Editar Factura e Ítems | Admin / Superadmin | Sesión activa Staff | Modificación de metadatos o ítems con recálculo automático y sincronización en BD (`recalcularTotalesFactura`). |
-| **CU-12** | Eliminar Factura de Compra | Admin / Superadmin | Confirmación en modal | Borrado en cascada en PostgreSQL y redirección a la lista. |
-| **CU-13** | Filtrado Reactivo en Cliente | Admin / Staff | Lista de facturas cargada | Filtrado en tiempo real en memoria usando `useFacturasFiltrosStore` de Zustand. |
-
----
-
-## ⚡ Requerimientos No Funcionales (RNF)
-
-1. **RNF-01 (Rendimiento y Web Vitals):** El portal debe mantener un Largest Contentful Paint (LCP) inferior a 2.5s y un Cumulative Layout Shift (CLS) inferior a 0.1, mediante lazy loading de recursos pesados e imágenes optimizadas con `next/image`.
-2. **RNF-02 (Carga Diferida - Lazy Loading):** Los componentes debajo del pliegue (ej. mapas de Google Maps, modales y drawers) y librerías externas pesadas deben diferir su carga con `next/dynamic` o `import()` bajo demanda para minimizar el bundle inicial de JavaScript.
-3. **RNF-03 (Seguridad en Endpoints BFF):** Los Route Handlers públicos deben implementar protección contra redirecciones abiertas (*Open Redirects*), validación estricta de esquemas y evitar llamadas circulares de `fetch()` desde Server Components.
-4. **RNF-04 (Identidad Institucional):** Todo el diseño debe apegarse a la guía de marca de Cigarrería Megalider (paleta de verdes `#067335`, `#038C3E`, `#53A677`, `#A7D9BD`, tipografías `Playfair Display` y `Plus Jakarta Sans`).
-5. **RNF-05 (Eficiencia de Tokens para IA):** El código y los prompts deben optimizar el contexto, evitando redundancias y aplicando directivas de alta densidad.
+1. 🎯 [**01 - Objetivos del Proyecto**](./01-Objetivos.md): Definición del objetivo general y objetivos específicos del negocio.
+2. 👤 [**02 - Historias de Usuario**](./02-Historias-de-Usuario.md): Historias de usuario (HU-01 a HU-14) divididas por módulos funcionales (Autenticación/Seguridad, Contabilidad/Hermes IA y Métricas/Inventario).
+3. 📋 [**03 - Matriz de Casos de Uso**](./03-Casos-de-Uso.md): Descripción de casos de uso (CU-01 a CU-13), actores, precondiciones y resultados esperados.
+4. ⚡ [**04 - Requerimientos No Funcionales**](./04-Requerimientos-No-Funcionales.md): Especificaciones de rendimiento (Core Web Vitals), Lazy Loading, seguridad en BFF, guía de marca y eficiencia de tokens.

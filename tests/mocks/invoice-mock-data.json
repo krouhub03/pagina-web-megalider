@@ -1,0 +1,22 @@
+[
+  {
+    "id": "INV-2026-001",
+    "numeroFactura": "FE-001052",
+    "proveedor": "Distribuidora Licores del Tolima S.A.S.",
+    "nit": "900123456-7",
+    "fechaEmision": "2026-08-15T10:00:00Z",
+    "subtotal": 500000,
+    "iva": 95000,
+    "total": 595000,
+    "cufe": "a1b2c3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e",
+    "items": [
+      {
+        "id": 1,
+        "descripcion": "Aguardiente Tapa Roja 750ml x 12",
+        "cantidad": 5,
+        "precioUnitario": 100000,
+        "total": 500000
+      }
+    ]
+  }
+]
