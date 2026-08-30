@@ -23,9 +23,12 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { formatDate } from "@/lib/utils";
 import dynamic from "next/dynamic";
-import ConfirmModal from "./ConfirmModal";
 
 const CreateUserModal = dynamic(() => import("./CreateUserModal"), {
+  ssr: false,
+});
+
+const ConfirmModal = dynamic(() => import("./ConfirmModal"), {
   ssr: false,
 });
 import {

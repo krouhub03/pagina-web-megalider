@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
+import { WebVitals } from "@/components/analytics/web-vitals";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -40,6 +41,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className="min-h-full flex flex-col font-sans bg-[#fafbf9] text-[#1e2e28] selection:bg-[#2ea587]/20 selection:text-[#0b4d3c]"
       >
+        <WebVitals />
         {children}
       </body>
     </html>

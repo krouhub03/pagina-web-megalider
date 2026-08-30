@@ -53,7 +53,7 @@ export default function PublicNavbar({ session }: PublicNavbarProps) {
 
   // Zustand selectores granulares
   const totalItems = useCartStore((state) => state.getTotalItems());
-  const toggleCart = useCartStore((state) => state.toggleCart());
+  const toggleCart = useCartStore((state) => state.toggleCart);
 
   // Roles autorizados para ingresar al Panel Administrativo
   const isStaff = Boolean(
@@ -144,7 +144,7 @@ export default function PublicNavbar({ session }: PublicNavbarProps) {
             {/* Botón Carrito con Badge */}
             <button
               type="button"
-              onClick={toggleCart}
+              onClick={() => toggleCart()}
               aria-label="Ver Carrito de Compras"
               className="relative p-2 rounded-xl text-slate-700 hover:text-[#067335] hover:bg-slate-100/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#067335] cursor-pointer"
             >

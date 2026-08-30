@@ -85,7 +85,7 @@ describe("Contabilidad Server Actions - Facturas", () => {
 
   describe("actualizarFacturaItemAction", () => {
     it("debe actualizar ítem y revalidar rutas", async () => {
-      const itemData = { descripcion: "Producto A", cantidadIngresada: 2, costoUnitarioCompra: 5000 };
+      const itemData = { descripcion: "Producto A", cantidadIngresada: "2", costoUnitarioCompra: "5000" };
       vi.mocked(actualizarFacturaItem).mockResolvedValueOnce({ success: true });
 
       const res = await actualizarFacturaItemAction(101, 15, itemData);
@@ -99,7 +99,7 @@ describe("Contabilidad Server Actions - Facturas", () => {
 
   describe("crearFacturaItemAction", () => {
     it("debe crear un ítem de factura y revalidar rutas", async () => {
-      const nuevoItem = { descripcion: "Producto B", cantidadIngresada: 1, costoUnitarioCompra: 10000 };
+      const nuevoItem = { descripcion: "Producto B", cantidadIngresada: "1", costoUnitarioCompra: "10000", costoTotalLinea: "10000" };
       vi.mocked(crearFacturaItem).mockResolvedValueOnce({ success: true });
 
       const res = await crearFacturaItemAction(15, nuevoItem);
