@@ -2,18 +2,18 @@
 
 import React from "react";
 import dynamic from "next/dynamic";
-import { BotonCopiarCufe } from "./BotonCopiarCufe";
-import { BotonEliminarFactura } from "./BotonEliminarFactura";
-import { FacturaEditarData } from "./ModalEditarFactura";
-import { ItemFacturaData } from "./ModalEditarFacturaItem";
+import { BotonCopiarCufe } from "../BotonCopiarCufe";
+import { BotonEliminarFactura } from "../BotonEliminarFactura";
+import { FacturaEditarData } from "../ModalEditarFactura";
+import { ItemFacturaData } from "../ModalEditarFacturaItem";
 
 const ModalEditarFactura = dynamic(
-  () => import("./ModalEditarFactura").then((mod) => mod.ModalEditarFactura),
+  () => import("../ModalEditarFactura").then((mod) => mod.ModalEditarFactura),
   { ssr: false }
 );
 
 const ModalEditarFacturaItem = dynamic(
-  () => import("./ModalEditarFacturaItem").then((mod) => mod.ModalEditarFacturaItem),
+  () => import("../ModalEditarFacturaItem").then((mod) => mod.ModalEditarFacturaItem),
   { ssr: false }
 );
 

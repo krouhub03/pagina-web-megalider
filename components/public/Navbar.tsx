@@ -29,6 +29,11 @@ const CartDrawer = dynamic(
   { ssr: false }
 );
 
+const AgeVerificationGate = dynamic(
+  () => import("./AgeVerificationGate").then((mod) => mod.AgeVerificationGate),
+  { ssr: false }
+);
+
 export interface SessionUser {
   id: number;
   nombre: string;
@@ -476,6 +481,9 @@ export default function PublicNavbar({ session }: PublicNavbarProps) {
 
       {/* Drawer del Carrito */}
       <CartDrawer />
+
+      {/* Gate de Verificación de Edad +18 */}
+      <AgeVerificationGate />
     </>
   );
 }

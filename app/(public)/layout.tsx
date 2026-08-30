@@ -1,13 +1,7 @@
 import React from "react";
-import dynamic from "next/dynamic";
 import PublicNavbar from "@/components/public/Navbar";
 import PublicFooter from "@/components/public/Footer";
 import { getSession } from "@/lib/auth/jwt";
-
-const AgeVerificationGate = dynamic(
-  () => import("@/components/public/AgeVerificationGate").then((mod) => mod.AgeVerificationGate),
-  { ssr: false }
-);
 
 export default async function PublicLayout({
   children,
@@ -21,7 +15,6 @@ export default async function PublicLayout({
       <PublicNavbar session={session} />
       <main className="flex-1">{children}</main>
       <PublicFooter />
-      <AgeVerificationGate />
     </div>
   );
 }
