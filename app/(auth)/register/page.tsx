@@ -6,10 +6,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { registerUserAction } from "@/services/auth.service";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
-import { PoliciesModal } from "@/components/auth/PoliciesModal";
+import { Input } from "@/components/ui/Input";
+import dynamic from "next/dynamic";
 import { RecaptchaWidget } from "@/components/ui/RecaptchaWidget";
+
+const PoliciesModal = dynamic(
+  () => import("@/components/auth/PoliciesModal").then((mod) => mod.PoliciesModal),
+  { ssr: false }
+);
 import {
   Lock,
   Mail,

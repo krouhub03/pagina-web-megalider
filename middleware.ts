@@ -31,40 +31,49 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/catalogo") ||
     pathname.startsWith("/usuarios");
 
+  let response: NextResponse;
+
   // 1. Redirigir a login si intenta ingresar a una ruta administrativa sin sesión
   if (isProtectedAdminRoute && !isAuthenticated) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("from", pathname);
-    return NextResponse.redirect(loginUrl);
+    response = NextResponse.redirect(loginUrl);
   }
-
   // 2. Si es un CLIENTE e intenta ingresar a rutas administrativas protegidas, redirigir a inicio
-  if (isProtectedAdminRoute && isAuthenticated && userRole === "CLIENTE") {
-    return NextResponse.redirect(new URL("/", request.url));
+  else if (isProtectedAdminRoute && isAuthenticated && userRole === "CLIENTE") {
+    response = NextResponse.redirect(new URL("/", request.url));
   }
-
   // 3. Si ya está autenticado e intenta ir a /login o /register:
-  // - Si es CLIENTE -> redirigir a inicio (/)
-  // - Si es STAFF (SUPERADMIN, ADMIN, CAJERO) -> redirigir a /dashboard
-  if ((pathname === "/login" || pathname === "/register") && isAuthenticated) {
+  else if ((pathname === "/login" || pathname === "/register") && isAuthenticated) {
     const destination = userRole === "CLIENTE" ? "/" : "/dashboard";
-    return NextResponse.redirect(new URL(destination, request.url));
+    response = NextResponse.redirect(new URL(destination, request.url));
+  }
+  // 4. Continuar normalmente
+  else {
+    response = NextResponse.next();
   }
 
-  return NextResponse.next();
+  // 🛡️ SECURITY HEADERS (OWASP Best Practices)
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=(), payment=()"
+  );
+
+  if (process.env.NODE_ENV === "production") {
+    response.headers.set(
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains"
+    );
+  }
+
+  return response;
 }
 
 export const config = {
   matcher: [
-    "/dashboard",
-    "/dashboard/:path*",
-    "/admin",
-    "/admin/:path*",
-    "/contabilidad/:path*",
-    "/hermes-logs/:path*",
-    "/catalogo/:path*",
-    "/usuarios/:path*",
-    "/login",
-    "/register",
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };

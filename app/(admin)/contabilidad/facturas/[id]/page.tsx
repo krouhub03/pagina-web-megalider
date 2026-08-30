@@ -17,9 +17,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { BotonCopiarCufe } from "../BotonCopiarCufe";
-import { BotonEliminarFactura } from "../BotonEliminarFactura";
-import { ModalEditarFactura } from "../ModalEditarFactura";
-import { ModalEditarFacturaItem } from "../ModalEditarFacturaItem";
+import { FacturaDetalleActions, FacturaItemAction } from "./FacturaDetalleInteractive";
 
 export const dynamic = "force-dynamic";
 
@@ -119,16 +117,7 @@ export default async function FacturaDetallePage({ params }: FacturaDetallePageP
           <Badge variant="emerald" className="px-3 py-1 text-xs">
             <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Registrada en Sistema
           </Badge>
-          <ModalEditarFactura
-            factura={factura}
-            variant="full"
-          />
-          <BotonEliminarFactura
-            facturaId={factura.id}
-            numeroFactura={factura.numeroFactura}
-            redirectOnSuccess="/contabilidad/facturas"
-            variant="full"
-          />
+          <FacturaDetalleActions factura={factura} />
         </div>
       </div>
 
@@ -258,7 +247,7 @@ export default async function FacturaDetallePage({ params }: FacturaDetallePageP
               </p>
             </div>
           </div>
-          <ModalEditarFacturaItem
+          <FacturaItemAction
             mode="create"
             facturaId={factura.id}
           />
@@ -269,7 +258,7 @@ export default async function FacturaDetallePage({ params }: FacturaDetallePageP
             <FileText className="w-8 h-8 text-slate-300 mx-auto" />
             <p className="font-semibold text-slate-700">Esta factura no cuenta con líneas de producto registradas.</p>
             <p className="text-slate-400">Puedes agregar productos manualmente haciendo clic en el botón inferior.</p>
-            <ModalEditarFacturaItem
+            <FacturaItemAction
               mode="create"
               facturaId={factura.id}
             />
@@ -340,7 +329,7 @@ export default async function FacturaDetallePage({ params }: FacturaDetallePageP
                         {formatCurrency(totalLinea)}
                       </td>
                       <td className="p-3.5 text-center">
-                        <ModalEditarFacturaItem
+                        <FacturaItemAction
                           mode="edit"
                           item={item}
                           facturaId={factura.id}

@@ -96,6 +96,9 @@ El proyecto cuenta con directivas estándar para agentes de codificación en `.a
 * [`nextjs-lazy-loading`](./.agents/skills/nextjs-lazy-loading/SKILL.md): Carga diferida con `next/dynamic`.
 * [`nextjs-bff`](./.agents/skills/nextjs-bff/SKILL.md): Arquitectura Backend for Frontend y Route Handlers.
 * [`nextjs-unit-testing`](./.agents/skills/nextjs-unit-testing/SKILL.md): Pruebas unitarias con Vitest y mocks de Next.js 16.
+* [`nextjs-integration-testing`](./.agents/skills/nextjs-integration-testing/SKILL.md): Pruebas de integración para Route Handlers BFF y Drizzle ORM.
+* [`nextjs-e2e-testing`](./.agents/skills/nextjs-e2e-testing/SKILL.md): Pruebas End-to-End con Playwright y control RBAC.
+* [`nextjs-system-testing`](./.agents/skills/nextjs-system-testing/SKILL.md): Pruebas de sistema, matriz CP-01 a CP-22 y Core Web Vitals.
 * [`nextjs-zustand`](./.agents/skills/nextjs-zustand/SKILL.md): Estado cliente inmutable con Zustand.
 
 ---

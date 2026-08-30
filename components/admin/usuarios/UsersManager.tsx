@@ -21,9 +21,12 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { formatDate } from "@/lib/utils";
-import CreateUserModal from "./CreateUserModal";
+import dynamic from "next/dynamic";
 import ConfirmModal from "./ConfirmModal";
+
+const CreateUserModal = dynamic(() => import("./CreateUserModal"), {
+  ssr: false,
+});
 import {
   UserItem,
   UserRole,

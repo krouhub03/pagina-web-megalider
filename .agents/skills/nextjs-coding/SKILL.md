@@ -1,54 +1,93 @@
 ---
 name: nextjs-coding
-description: Guía experta y directivas para codificar en Next.js (App Router y Next 16+) siguiendo los estándares oficiales de AI Coding Agents (documentación interna versionada, runtime visibility, dev loop, Server/Client components, caché y resolución guiada de errores).
+description: Guía experta y directivas para codificar en Next.js (App Router y Next 16+) siguiendo los estándares de Arquitectura Frontend, Server Components, Colocation, Server Actions, URL State, Core Web Vitals y principios SOLID adaptados a Cigarrería Megalider.
 ---
 
-# Guía de Codificación y Flujo de Trabajo para Next.js (AI Agent Standard)
+# Guía de Arquitectura Frontend y Codificación (Cigarrería Megalider)
 
-Directivas oficiales y patrones de arquitectura para codificar eficientemente en Next.js (versión 16+ con App Router), optimizando la exactitud del código, el rendimiento y el ciclo de verificación según la guía oficial de Next.js para agentes de IA.
-
----
-
-## 1. Documentación Local Versionada (`node_modules/next/dist/docs/`)
-
-> **REGLA DE ORO:** Nunca adivinar APIs ni confiar en conocimiento de entrenamiento desactualizado. Next.js incluye su documentación completa y sincronizada con la versión instalada dentro del proyecto.
-
-### Rutas de Consulta Local
-- **Ruta base**: `node_modules/next/dist/docs/`
-  - `01-app/01-getting-started/`: Enrutamiento, layouts, páginas y componentes.
-  - `01-app/02-guides/`: Caching, optimización, Server Actions, autenticación, etc.
-  - `01-app/03-api-reference/`: Directivas, funciones (`cookies`, `headers`, `revalidatePath`, etc.), componentes (`Image`, `Link`, etc.) y `next.config.ts`.
-  - `03-architecture/`: Fast Refresh, compilador y optimizaciones.
-
-### Fallback de Red y Errores Específicos
-- **Markdown en red**: Cualquier página oficial puede consultarse en formato Markdown añadiendo `.md` al final:
-  - `https://nextjs.org/docs/app/building-your-application/routing.md`
-  - `https://nextjs.org/docs/messages/<error-code>.md` (para mensajes de error específicos y patrones canónicos de solución).
-- **Índice de documentación**: `https://nextjs.org/docs/llms.txt` y `https://nextjs.org/docs/llms-full.txt`.
+## Rol y Experiencia
+Eres un Arquitecto Frontend y Desarrollador Senior especializado en el ecosistema moderno de React: **Next.js 16+ (App Router)**, **TypeScript**, **Tailwind CSS v4** y **Drizzle ORM / Prisma**. Escribes código limpio, tipado, modular y altamente optimizado siguiendo los principios SOLID y la identidad visual de Cigarrería Megalider.
 
 ---
 
-## 2. Convenciones Críticas de Next.js 16+ (App Router)
+## 1. Arquitectura de Proyecto y Colocación (Colocation)
 
-### A. Asincronía Obligatoria (`params`, `searchParams`, `cookies`, `headers`)
-En Next.js 15 y 16+, `params`, `searchParams`, `cookies()` y `headers()` son **Promesas asíncronas**:
+### A. Estructura Raíz del Proyecto
+El proyecto utiliza la estructura de raíz directa (sin la subcarpeta `/src`):
+
+```plaintext
+pagina-web-megalider/
+├── app/                        # App Router de Next.js 16+
+│   ├── (auth)/                 # Grupo de autenticación
+│   ├── (admin)/                # Grupo de administración y contabilidad
+│   ├── layout.tsx              # Layout global
+│   └── page.tsx                # Homepage / Tienda
+├── components/
+│   └── ui/                     # EXCLUSIVO: Componentes puros/atómicos compartidos
+├── lib/                        # Clientes DB (Drizzle), utils (cn, COP, fechas)
+├── services/                   # Servicios de lógica de negocio y base de datos
+├── tests/                      # Pruebas Unitarias, Integración y E2E
+└── package.json
+```
+
+### B. Principio de Proximidad (Colocation)
+- **Archivos Locales de Ruta**: Ubica componentes de vista (`Form.tsx`, `Modal.tsx`), interfaces (`types.ts`) y Server Actions (`actions.ts`) dentro de la misma carpeta de la ruta (`page.tsx`) donde se consumen (ej. `app/(admin)/contabilidad/facturas/`).
+- **Componentes Globales (`/components/ui/`)**: Reserva la carpeta `/components/ui/` EXCLUSIVAMENTE para componentes visuales puros, genéricos y reutilizables (`Button.tsx`, `Input.tsx`, `Modal.tsx`, `Badge.tsx`). Nunca colocar componentes con lógica de negocio en `/components/ui/`.
+
+---
+
+## 2. Renderizado: Server-First vs Client Components
+
+- **Server-First por Defecto**: Construye TODOS los componentes como Server Components (`async function Page()`) por defecto.
+- **Aislamiento Quirúrgico del Cliente**: Usa la directiva `"use client"` únicamente en los nodos hoja (los componentes más profundos del árbol) que requieran interactividad explícita (`useState`, `useEffect`, `onClick`, `onChange`). Extrae los elementos interactivos a sus propios archivos locales.
+- **Data Fetching Asíncrono Directo**: Realiza las consultas a la base de datos de forma directa y asíncrona dentro de Server Components o a través de la capa de servicios (`@/services/*`). **NUNCA** uses `useEffect` para obtener datos iniciales en el cliente.
+
+---
+
+## 3. Gestión de Estado y Mutaciones
+
+- **El Estado en la URL (`searchParams`)**: Para filtros (categorías de licores/cervezas), paginación, pestañas o modales activos, lee y escribe en los `searchParams` de la URL en lugar de usar estados locales frágiles de React o gestores globales innecesarios.
+- **Server Actions (`actions.ts`)**: Maneja el envío de formularios y mutaciones de datos exclusivamente a través de Server Actions en archivos dedicados (`actions.ts` con la directiva `"use server"` en la parte superior).
+- **Respuestas Estructuradas**: Todas las Server Actions deben retornar respuestas tipadas `{ success: boolean, data?: T, error?: string }` y revalidar la caché con `revalidatePath`.
+
+---
+
+## 4. Rendimiento y UX (Core Web Vitals)
+
+- **Imágenes**: Utiliza SIEMPRE `<Image>` de `next/image` con propiedades de dimensión (`width`/`height` o `fill`) y optimización de formato.
+- **Navegación**: Utiliza SIEMPRE `<Link>` de `next/link` para navegación SPA sin recarga completa de página.
+- **Streaming & Shell UI**: Envuelve los componentes asíncronos en `<Suspense fallback={<Skeleton />}>` para desbloquear la renderización inicial de la interfaz y mantener la navegación instantánea.
+
+---
+
+## 5. Aplicación Práctica de SOLID
+
+- **SRP (Single Responsibility Principle)**: Extrae la lógica compleja de los Client Components hacia Custom Hooks (`useFacturaEdit.ts`). Separa la obtención de datos de la renderización visual.
+- **ISP (Interface Segregation Principle)**: Evita el Prop Drilling masivo. Pasa a los componentes hijos solo las primitivas necesarias, no objetos completos e innecesarios.
+- **OCP (Open/Closed Principle)**: Usa el patrón de composición (mediante la prop `children`) para crear componentes flexibles y extensibles en lugar de llenarlos de condicionales `if/else`.
+
+---
+
+## 6. Convenciones de Next.js 16+ (Asincronía Obligatoria)
+
+En Next.js 16+, `params`, `searchParams`, `cookies()` y `headers()` son **Promesas asíncronas**:
 
 ```tsx
 // ✅ Correcto en Page Components (Server Component)
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default async function ProductPage({ params, searchParams }: PageProps) {
-  const { slug } = await params;
+export default async function FacturaPage({ params, searchParams }: PageProps) {
+  const { id } = await params;
   const query = await searchParams;
-  return <div>Producto: {slug}</div>;
+  return <div>Factura ID: {id}</div>;
 }
 ```
 
 ```tsx
-// ✅ Correcto al acceder a cookies o headers en Server Components / Server Actions
+// ✅ Correcto en Server Components / Server Actions
 import { cookies, headers } from 'next/headers';
 
 export async function checkSession() {
@@ -60,94 +99,3 @@ export async function checkSession() {
   return { token, userAgent };
 }
 ```
-
-### B. Server Components vs Client Components
-1. **Server Components por Defecto**: Todos los archivos en `app/` son Server Components a menos que especifiquen `'use client'`.
-   - Utilizar Server Components para: fetching directo a base de datos, lectura de archivos, secretos/tokens, reducción de bundle de JavaScript en el cliente.
-2. **`'use client'` Quirúrgico**:
-   - Ubicar la directiva `'use client'` únicamente en las "hojas" del árbol de componentes que requieran interactividad (hooks de React como `useState`, `useEffect`, `useCallback`, eventos de DOM `onClick`, `onChange`, o APIs del navegador).
-   - Nunca colocar `'use client'` en una página o layout completo si solo un botón o formulario necesita interactividad. Extraer el componente interactivo a su propio archivo.
-
-### C. Server Actions y Mutaciones Seguras (`'use server'`)
-- Colocar `'use server'` en la parte superior del archivo o dentro de la función asíncrona.
-- Siempre validar la entrada (ej. con Zod o esquemas tipados) y verificar permisos/sesión.
-- Retornar respuestas estructuradas `{ success: boolean, data?: T, error?: string }` en lugar de lanzar excepciones no controladas.
-
-```tsx
-'use server';
-
-import { revalidatePath } from 'next/cache';
-
-export async function updateProductAction(formData: FormData) {
-  try {
-    const id = formData.get('id') as string;
-    // Validaciones y mutación en DB...
-    revalidatePath('/admin/products');
-    return { success: true };
-  } catch (err) {
-    return { success: false, error: 'Error al actualizar el producto' };
-  }
-}
-```
-
-### D. Streaming y Manejo de Suspense Boundaries
-- Envolver accesos a datos asíncronos o componentes lentos con `<Suspense fallback={<Skeleton />}>` para permitir que el resto de la página se renderice de forma instantánea y evitar bloqueos en el servidor.
-- Mantener la navegación instantánea separando el cascarón (App Shell) de los datos dinámicos.
-
----
-
-## 3. Runtime Visibility & Loop de Desarrollo (`next-dev-loop`)
-
-Sigue un ciclo cerrado de 3 etapas en cada tarea de código:
-
-```
-[1. Inspeccionar / Contexto] ──> [2. Edición Quirúrgica] ──> [3. Verificación Runtime]
-```
-
-### 1. Inspeccionar
-- Identificar la ruta en el App Router (`app/(routes)/...`).
-- Verificar si el servidor de desarrollo ya está corriendo revisando `.next/dev/lock` o la salida de la terminal.
-
-### 2. Edición Quirúrgica
-- Aplicar cambios respetando tipado estricto de TypeScript.
-- Respetar la paleta de colores y componentes de la marca (ver skill `megalider-brand`).
-- Mantener optimización de tokens y código limpio (ver skill `token-optimization`).
-
-### 3. Verificación Runtime
-- Comprobar que no se generen advertencias ni errores en la compilación de TypeScript / ESLint.
-- Ejecutar verificación de build cuando se modifiquen rutas críticas:
-  ```bash
-  npm run build
-  ```
-- Si hay errores de prerenderizado en compilación, usar el flag de depuración:
-  ```bash
-  npx next build --debug-prerender
-  ```
-
----
-
-## 4. Diagnóstico y Corrección Guiada por Errores
-
-Cuando Next.js arroje errores durante la compilación o el renderizado, analiza las opciones estructuradas que el framework provee:
-
-1. **`[stream]`**: El acceso a datos dinámicos bloquea el prerenderizado.
-   - *Solución*: Envolver la lectura o el componente dinámico dentro de `<Suspense fallback={...}>`.
-2. **`[cache]`**: El acceso a datos puede ser cacheado.
-   - *Solución*: Usar la directiva `"use cache"` o estrategias de caché compatibles.
-3. **`[block]`**: La ruta requiere necesariamente ejecución bajo demanda por solicitud.
-   - *Solución*: Definir explícitamente `export const dynamic = 'force-dynamic'` o `export const instant = false`.
-
-### Consulta Rápida de Errores
-- Buscar el código o mensaje en `https://nextjs.org/docs/messages/<nombre-del-error>.md` para aplicar el patrón canónico exacto.
-
----
-
-## 5. Checklist de Calidad antes de Finalizar Código
-
-- [ ] ¿Los `params` y `searchParams` en componentes de página tienen `await`?
-- [ ] ¿Los accesos a `cookies()` y `headers()` son asíncronos (`await cookies()`)?
-- [ ] ¿Se separaron correctamente los componentes Server y Client (`'use client'`)?
-- [ ] ¿Las imágenes utilizan `next/image` con dimensiones (`width`/`height` o `fill`) y optimización adecuada?
-- [ ] ¿Las navegaciones internas usan `next/link` en lugar de etiquetas `<a>`?
-- [ ] ¿Las mutaciones y formularios manejan validación y estado de carga (`useActionState`, `useFormStatus` o `isPending`)?
-- [ ] ¿El código pasa el chequeo de tipos TypeScript y no tiene errores de compilación?

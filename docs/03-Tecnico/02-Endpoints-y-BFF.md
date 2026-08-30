@@ -1,29 +1,79 @@
-# 🌐 02 - Endpoints de API y Backend for Frontend (BFF)
+# 🌐 02 - Estándar de API y Backend for Frontend (BFF) - Versión 3.0
 
-Este documento especifica las rutas API de autenticación, la arquitectura Backend for Frontend (BFF) y la resolución de parámetros asíncronos en Next.js 16+.
-
----
-
-## 🌐 1. Catálogo de Endpoints de Autenticación API
-
-| Endpoint | Método | Descripción |
-| :--- | :--- | :--- |
-| `/api/auth/google` | `GET` | Genera el token criptográfico anti-CSRF (`state`), lo guarda en la cookie `oauth_state` y redirige a la pantalla de autorización de Google. |
-| `/api/auth/google/callback` | `GET` | Recibe el código de autorización, lo canjea por el token de acceso, consulta el perfil de Google, sincroniza el usuario en MySQL (`usuarios`), emite la cookie JWT `auth_token` y redirige al usuario según su rol (Clientes a `/`, Staff a `/dashboard`). |
+Este documento especifica la **arquitectura técnica estandarizada y securizada** de la capa API y Backend for Frontend (BFF) en el proyecto **Cigarrería Megalider** (Next.js 16+ App Router).
 
 ---
 
-## 🌐 2. Manual Técnico de Backend for Frontend (BFF) & Route Handlers
+## 🌐 1. Catálogo Completo de Endpoints API
 
-* **Convención de Archivo:** Archivos `app/**/route.ts` manejando métodos `GET`, `POST`, `PUT`, `DELETE`, etc.
-* **Resolución de Parámetros Asíncronos (Next.js 16+):**
-  ```ts
-  export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    // ...
+| Endpoint | Método | Autenticación / Protección | Descripción |
+| :--- | :--- | :--- | :--- |
+| `/api/auth/google` | `GET` | Pública / CSRF State | Genera token criptográfico anti-CSRF (`state`), setea cookie `oauth_state` y redirige a Google OAuth 2.0. |
+| `/api/auth/google/callback` | `GET` | Cookie `oauth_state` + Whitelist | Canjea el código de autorización, consulta perfil Google, sincroniza en MySQL (`usuarios`), emite JWT `auth_token` y redirige según rol con validación anti Open Redirect. |
+| `/api/analytics` | `POST` | Pública / Zod Validated | Recibe telemetría no bloqueante de Core Web Vitals (`sendBeacon`). |
+| `/api/webhooks/revalidate` | `POST` | Bearer Secret (`timingSafeEqual`) | Revalida la caché bajo demanda (`revalidateTag` / `revalidatePath`) y registra el evento en auditoría. |
+| `/api/openapi` | `GET` | Dev Mode / API Key | Retorna la especificación técnica OpenAPI 3.0 en formato JSON. |
+
+---
+
+## 📐 2. Estructura de Respuesta Estandarizada (`ApiResponse<T>`)
+
+Todos los Route Handlers (`app/api/**/route.ts`) deben utilizar los helpers de `lib/api/response.ts` para garantizar el contrato JSON unificado:
+
+### A. Respuesta de Éxito (`200 OK`, `201 Created`)
+```json
+{
+  "success": true,
+  "data": { ... },
+  "meta": {
+    "timestamp": "2026-08-29T23:58:00.000Z"
   }
-  ```
-* **Lectura de Payloads:** Métodos `request.json()`, `request.formData()` y clonación `request.clone()` para relecturas seguras.
-* **Seguridad en Redirecciones:**
-  - Prevención de *Open Redirects* mediante comprobación de origen: `destination.origin === request.nextUrl.origin`.
-  - Validación de firmas/secretos en webhooks de revalidación (`revalidateTag`).
+}
+```
+
+### B. Respuesta de Error (`400`, `401`, `403`, `404`, `429`, `500`)
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Los datos enviados en la petición no son válidos.",
+    "details": [
+      {
+        "field": "email",
+        "message": "Formato de correo electrónico inválido"
+      }
+    ]
+  }
+}
+```
+
+---
+
+## 🛡️ 3. Reglas de Validación, Seguridad y Hardening
+
+### 3.1 Validación Estricta con Zod y Content-Type (`lib/api/validation.ts`)
+* Todo endpoint que acepte peticiones `POST`, `PUT` o `PATCH` debe validar previamente que la cabecera `Content-Type` incluya `application/json` usando `parseJSONBody(request)`.
+* Los datos deben ser parseados con `validateSchema(schema, body)`. En caso de fallo, se retorna un HTTP 400 estandarizado con el detalle de campos.
+
+### 3.2 Verificación de Tokens a Prueba de Timing Attacks (`lib/api/security.ts`)
+* Para endpoints protegidos por secreto (webhooks), la comprobación del Bearer Token DEBE usar `crypto.timingSafeEqual` con `Buffer.from()` en tiempo constante, evitando ataques de medición de tiempo.
+
+### 3.3 Mitigación de Redirecciones Abiertas (*Open Redirects*)
+* La función `validateRedirectUri(path)` valida que la ruta de retorno sea relativa, comience por `/` y pertenezca a la lista blanca de rutas de la aplicación (`/`, `/dashboard`, `/catalogo`, `/contabilidad`, `/usuarios`, `/admin`).
+
+### 3.4 Encabezados de Seguridad HTTP (`middleware.ts`)
+El middleware global inyecta automáticamente en todas las respuestas las siguientes cabeceras de seguridad OWASP:
+* `X-Frame-Options: DENY`
+* `X-Content-Type-Options: nosniff`
+* `Referrer-Policy: strict-origin-when-cross-origin`
+* `Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()`
+* `Strict-Transport-Security: max-age=31536000; includeSubDomains` (en producción)
+
+---
+
+## 🌐 4. Convenciones Next.js 16+ para BFF
+
+1. **Parámetros Asíncronos:** Todo acceso a `context.params` debe ser resuelto mediante `await params`.
+2. **Revalidación de Caché:** `revalidateTag(tag, "default")` requiere 2 argumentos en Next.js 16+.
+3. **Anti-Patrón de Fetching Interno:** Los Server Components (`app/**/page.tsx`) NUNCA realizan `fetch()` a rutas `/api` propias. Consumen directamente los servicios o capas de acceso a datos (`lib/db/mysql`, `lib/db/postgres`).

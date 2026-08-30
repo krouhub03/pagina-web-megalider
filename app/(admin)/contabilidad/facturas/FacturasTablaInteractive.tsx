@@ -7,10 +7,14 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { useFacturasFiltrosStore } from "@/lib/stores/use-facturas-filtros-store";
+import dynamic from "next/dynamic";
 import { BotonCopiarCufe } from "./BotonCopiarCufe";
 import { BotonEliminarFactura } from "./BotonEliminarFactura";
-import { ModalEditarFactura } from "./ModalEditarFactura";
+
+const ModalEditarFactura = dynamic(
+  () => import("./ModalEditarFactura").then((mod) => mod.ModalEditarFactura),
+  { ssr: false }
+);
 
 interface FacturaItemSchema {
   id: number;

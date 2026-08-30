@@ -68,3 +68,21 @@ docs/
 | **04-Gestion** | Roadmap de fases, estado de entregables, actas de decisiones y estandarización de skills. | [Ver Gestión](./04-Gestion/README.md) |
 | **05-Pruebas** | Matrices de prueba por carpetas (Sistema, Unitarias, Integración, E2E, Setup/Mocks, Resultados). | [Ver Pruebas](./05-Pruebas/README.md) |
 | **06-Dominios-de-Usuario** | Especificación orientada por actor: Usuario Externo (`public`), Usuario Interno (`admin`) y BFF (`api`). | [Ver Dominios](./06-Dominios-de-Usuario/README.md) |
+
+---
+
+## 🤖 Skills de Agentes de IA Indexadas
+
+El proyecto cuenta con un conjunto de skills especializadas en `.agents/skills/`:
+
+* [`nextjs-coding`](../.agents/skills/nextjs-coding/SKILL.md): Estándar de codificación para Next.js 16+ (App Router).
+* [`megalider-brand`](../.agents/skills/megalider-brand/SKILL.md): Guía de marca, diseño, paleta de colores y recursos visuales.
+* [`token-optimization`](../.agents/skills/token-optimization/SKILL.md): Directivas de eficiencia de contexto y consumo de tokens.
+* [`nextjs-analytics`](../.agents/skills/nextjs-analytics/SKILL.md): Instrumentación de Core Web Vitals y telemetría no bloqueante.
+* [`nextjs-lazy-loading`](../.agents/skills/nextjs-lazy-loading/SKILL.md): Patrones de carga diferida con `next/dynamic`, `import()` y magic comments.
+* [`nextjs-bff`](../.agents/skills/nextjs-bff/SKILL.md): Arquitectura Backend for Frontend, Route Handlers y negociación de contenido.
+* [`nextjs-unit-testing`](../.agents/skills/nextjs-unit-testing/SKILL.md): Patrones de diseño y ejecución de pruebas unitarias con Vitest, React Testing Library y mocks.
+* [`nextjs-integration-testing`](../.agents/skills/nextjs-integration-testing/SKILL.md): Pruebas de integración para Route Handlers BFF, Drizzle ORM Multi-BD y autenticación.
+* [`nextjs-e2e-testing`](../.agents/skills/nextjs-e2e-testing/SKILL.md): Pruebas End-to-End con Playwright, simulación de navegador y control RBAC.
+* [`nextjs-system-testing`](../.agents/skills/nextjs-system-testing/SKILL.md): Pruebas de sistema, matriz CP-01 a CP-22, compilación Turbopack y Web Vitals.
+* [`nextjs-zustand`](../.agents/skills/nextjs-zustand/SKILL.md): Reglas de arquitectura, diseño de stores (`lib/stores/`) y pruebas unitarias de estado cliente con Zustand.

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { validateRedirectUri } from "@/lib/api/security";
 
 export async function GET(request: NextRequest) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -18,8 +19,9 @@ export async function GET(request: NextRequest) {
   const state = crypto.randomUUID();
   const redirectUri = `${baseUrl}/api/auth/google/callback`;
 
-  // Capturar ruta de retorno opcional (ej: /catalogo, /contabilidad)
-  const from = request.nextUrl.searchParams.get("from") || "/dashboard";
+  // Capturar y sanitizar ruta de retorno opcional
+  const rawFrom = request.nextUrl.searchParams.get("from") || "/dashboard";
+  const { safePath } = validateRedirectUri(rawFrom);
 
   // Construir la URL de autorización de Google OAuth 2.0
   const googleAuthUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
@@ -33,9 +35,8 @@ export async function GET(request: NextRequest) {
 
   const response = NextResponse.redirect(googleAuthUrl);
 
-  // Almacenar el state y la ruta de destino en cookies seguras HttpOnly temporales
   const isSecure = process.env.NODE_ENV === "production";
-  
+
   response.cookies.set("oauth_state", state, {
     httpOnly: true,
     secure: isSecure,
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
     maxAge: 60 * 10, // 10 minutos
   });
 
-  response.cookies.set("oauth_redirect_to", from, {
+  response.cookies.set("oauth_redirect_to", safePath, {
     httpOnly: true,
     secure: isSecure,
     sameSite: "lax",

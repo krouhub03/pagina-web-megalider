@@ -19,8 +19,15 @@ import {
   ChevronRight,
   Sparkles,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/Button";
 import { logoutAction } from "@/services/auth.service";
+import { useCartStore } from "@/lib/stores/use-cart-store";
+
+const CartDrawer = dynamic(
+  () => import("./CartDrawer").then((mod) => mod.CartDrawer),
+  { ssr: false }
+);
 
 export interface SessionUser {
   id: number;
@@ -38,6 +45,10 @@ export default function PublicNavbar({ session }: PublicNavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const pathname = usePathname();
+
+  // Zustand selectores granulares
+  const totalItems = useCartStore((state) => state.getTotalItems());
+  const toggleCart = useCartStore((state) => state.toggleCart());
 
   // Roles autorizados para ingresar al Panel Administrativo
   const isStaff = Boolean(
@@ -125,6 +136,20 @@ export default function PublicNavbar({ session }: PublicNavbarProps) {
 
           {/* Desktop & Tablet Top Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Botón Carrito con Badge */}
+            <button
+              type="button"
+              onClick={toggleCart}
+              aria-label="Ver Carrito de Compras"
+              className="relative p-2 rounded-xl text-slate-700 hover:text-[#067335] hover:bg-slate-100/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#067335] cursor-pointer"
+            >
+              <ShoppingBag className="w-5 h-5 text-[#067335]" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 bg-amber-400 text-emerald-950 font-bold text-[10px] rounded-full w-4 h-4 flex items-center justify-center border border-white shadow-2xs">
+                  {totalItems}
+                </span>
+              )}
+            </button>
             {session ? (
               /* Usuario Autenticado */
               <div className="flex items-center gap-2 sm:gap-3">
@@ -448,6 +473,9 @@ export default function PublicNavbar({ session }: PublicNavbarProps) {
           )}
         </div>
       </nav>
+
+      {/* Drawer del Carrito */}
+      <CartDrawer />
     </>
   );
 }

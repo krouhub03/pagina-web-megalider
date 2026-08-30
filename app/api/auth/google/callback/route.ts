@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { dbMysql, schema } from "@/lib/db/mysql";
 import { eq, or } from "drizzle-orm";
 import { signJWT } from "@/lib/auth/jwt";
+import { validateRedirectUri } from "@/lib/api/security";
 
 interface GoogleUserInfo {
   sub: string;
@@ -166,13 +167,12 @@ export async function GET(request: NextRequest) {
       avatarUrl: userAvatarUrl,
     });
 
-    // 8. Determinar ruta de destino según RBAC
-    // Si es CLIENTE -> redirigir a inicio (/)
-    // Si es STAFF (SUPERADMIN, ADMIN, CAJERO) -> redirigir a /dashboard o ruta solicitada
+    // 8. Determinar ruta de destino según RBAC y validación anti Open Redirect
     let targetPath = "/";
     if (userRol !== "CLIENTE") {
-      const rawRedirect = request.cookies.get("oauth_redirect_to")?.value;
-      targetPath = rawRedirect && rawRedirect.startsWith("/") ? rawRedirect : "/dashboard";
+      const rawRedirect = request.cookies.get("oauth_redirect_to")?.value || "/dashboard";
+      const { safePath } = validateRedirectUri(rawRedirect);
+      targetPath = safePath;
     }
     const finalUrl = new URL(targetPath, baseUrl);
 
