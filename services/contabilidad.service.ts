@@ -58,6 +58,192 @@ export async function getFacturaDetalle(facturaId: number) {
   }
 }
 
+// 2b. Eliminar una factura de compra por su ID
+export async function eliminarFactura(facturaId: number) {
+  try {
+    await dbPostgres
+      .delete(schema.facturas)
+      .where(eq(schema.facturas.id, facturaId));
+    return { success: true };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
+    console.error(`Error al eliminar factura #${facturaId}:`, error);
+    return { success: false, error: message };
+  }
+}
+
+// 2c. Actualizar / Corregir datos de una factura de compra por su ID
+export interface ActualizarFacturaInput {
+  numeroFactura?: string;
+  cufe?: string | null;
+  documentoReferencia?: string | null;
+  fechaEmision?: string;
+  fechaVencimiento?: string | null;
+  condicionPago?: string | null;
+  medioPago?: string | null;
+  subtotal?: string;
+  iva?: string;
+  impoconsumo?: string;
+  totalFactura?: string;
+  observaciones?: string | null;
+}
+
+export async function actualizarFactura(facturaId: number, datos: ActualizarFacturaInput) {
+  try {
+    await dbPostgres
+      .update(schema.facturas)
+      .set({
+        ...datos,
+      })
+      .where(eq(schema.facturas.id, facturaId));
+    return { success: true };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
+    console.error(`Error al actualizar factura #${facturaId}:`, error);
+    return { success: false, error: message };
+  }
+}
+
+// 2d. Gestión de Ítems / Productos de la Factura
+export interface FacturaItemInput {
+  codigoBarras?: string | null;
+  codigoProveedor?: string | null;
+  descripcion: string;
+  cantidadIngresada: string;
+  unidadMedida?: string | null;
+  costoUnitarioCompra: string;
+  descuentoPorProducto?: string;
+  ivaTotal?: string;
+  porcentajeIva?: string;
+  impuestoConsumo?: string;
+  otrosImpuestos?: string;
+  costoTotalLinea: string;
+}
+
+// Función auxiliar para recalcular y sincronizar automáticamente en BD los totales de la factura
+export async function recalcularTotalesFactura(facturaId: number) {
+  try {
+    const items = await dbPostgres.query.facturaItems.findMany({
+      where: eq(schema.facturaItems.facturaId, facturaId),
+    });
+
+    let subtotalAcum = 0;
+    let ivaAcum = 0;
+    let impoconsumoAcum = 0;
+    let otrosImpAcum = 0;
+    let descuentoAcum = 0;
+    let totalFacturaAcum = 0;
+
+    for (const item of items) {
+      const cant = Number(item.cantidadIngresada || 0);
+      const costo = Number(item.costoUnitarioCompra || 0);
+      const desc = Number(item.descuentoPorProducto || 0);
+      const iva = Number(item.ivaTotal || 0);
+      const impo = Number(item.impuestoConsumo || 0);
+      const otros = Number(item.otrosImpuestos || 0);
+      const totalLinea = Number(item.costoTotalLinea || 0);
+
+      subtotalAcum += (cant * costo) - desc;
+      ivaAcum += iva;
+      impoconsumoAcum += impo;
+      otrosImpAcum += otros;
+      descuentoAcum += desc;
+      totalFacturaAcum += totalLinea;
+    }
+
+    await dbPostgres
+      .update(schema.facturas)
+      .set({
+        subtotal: String(subtotalAcum.toFixed(2)),
+        iva: String(ivaAcum.toFixed(2)),
+        impoconsumo: String(impoconsumoAcum.toFixed(2)),
+        otrosImpuestosTotal: String(otrosImpAcum.toFixed(2)),
+        descuentoTotalFactura: String(descuentoAcum.toFixed(2)),
+        totalFactura: String(totalFacturaAcum.toFixed(2)),
+      })
+      .where(eq(schema.facturas.id, facturaId));
+
+    return { success: true };
+  } catch (error) {
+    console.error(`Error al recalcular totales para la factura #${facturaId}:`, error);
+    return { success: false };
+  }
+}
+
+export async function actualizarFacturaItem(
+  itemId: number,
+  datos: Partial<FacturaItemInput>,
+  facturaId?: number
+) {
+  try {
+    let targetFacturaId = facturaId;
+    if (!targetFacturaId) {
+      const itemExistente = await dbPostgres.query.facturaItems.findFirst({
+        where: eq(schema.facturaItems.id, itemId),
+      });
+      targetFacturaId = itemExistente?.facturaId ?? undefined;
+    }
+
+    await dbPostgres
+      .update(schema.facturaItems)
+      .set(datos)
+      .where(eq(schema.facturaItems.id, itemId));
+
+    if (targetFacturaId) {
+      await recalcularTotalesFactura(targetFacturaId);
+    }
+    return { success: true };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
+    console.error(`Error al actualizar ítem #${itemId}:`, error);
+    return { success: false, error: message };
+  }
+}
+
+export async function crearFacturaItem(facturaId: number, datos: FacturaItemInput) {
+  try {
+    await dbPostgres.insert(schema.facturaItems).values({
+      facturaId,
+      ...datos,
+    });
+
+    await recalcularTotalesFactura(facturaId);
+    return { success: true };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
+    console.error("Error al crear ítem de factura:", error);
+    return { success: false, error: message };
+  }
+}
+
+export async function eliminarFacturaItem(itemId: number, facturaId?: number) {
+  try {
+    let targetFacturaId = facturaId;
+    if (!targetFacturaId) {
+      const itemExistente = await dbPostgres.query.facturaItems.findFirst({
+        where: eq(schema.facturaItems.id, itemId),
+      });
+      targetFacturaId = itemExistente?.facturaId ?? undefined;
+    }
+
+    await dbPostgres
+      .delete(schema.facturaItems)
+      .where(eq(schema.facturaItems.id, itemId));
+
+    if (targetFacturaId) {
+      await recalcularTotalesFactura(targetFacturaId);
+    }
+    return { success: true };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
+    console.error(`Error al eliminar ítem #${itemId}:`, error);
+    return { success: false, error: message };
+  }
+}
+
+
+
+
 // 3. Obtener listado de Egresos / Gastos de la Tienda
 export async function getEgresosTienda(filtros: FiltrosEgresos = {}) {
   try {

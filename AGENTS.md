@@ -16,3 +16,5 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - **Lazy Loading & Dynamic Imports**: Consultar la skill `.agents/skills/nextjs-lazy-loading/SKILL.md` para patrones de carga diferida con `next/dynamic`, `React.lazy`, deshabilitación segura de SSR (`ssr: false`), importación de librerías bajo demanda y magic comments.
 - **Backend for Frontend (BFF) & APIs**: Consultar la skill `.agents/skills/nextjs-bff/SKILL.md` para arquitectura BFF, Route Handlers (`route.ts`), webhooks, negociación de contenido, proxying seguro y reglas de fetching interno.
 - **Unit Testing**: Consultar la skill `.agents/skills/nextjs-unit-testing/SKILL.md` para patrones de pruebas unitarias con Vitest, React Testing Library, mocks de Next.js 16 (App Router, async params, cookies, headers), utilidades, componentes de UI, autenticación (JWT/jose) y Route Handlers.
+- **State Management (Zustand)**: Consultar la skill `.agents/skills/nextjs-zustand/SKILL.md` para reglas de diseño, estado cliente inmutable, stores (`lib/stores/`), persistencia transparente (`safeStorage`), consumo en Client Components con selectores y testing con Vitest.
+

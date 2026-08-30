@@ -31,6 +31,10 @@ Desarrollar una plataforma integral para Cigarrería Megalider compuesta por una
 * **HU-05:** *Como administrador*, quiero visualizar el listado de facturas de compras con su desglose de impuestos (IVA, Impoconsumo, CUFE) para controlar el abastecimiento de mercancía.
 * **HU-06:** *Como administrador*, quiero revisar los egresos de caja registrados por Hermes Bot y modificarlos si contienen errores de extracción, dejando constancia del motivo de corrección.
 * **HU-07:** *Como auditor*, quiero consultar un registro cronológico de todas las correcciones manuales hechas a los egresos de Hermes para mantener la transparencia contable.
+* **HU-11:** *Como administrador*, quiero ver el detalle completo de cada factura de compra con su desglose de impuestos, proveedor, adquiriente y líneas de producto en una tabla scrollable con sticky header.
+* **HU-12:** *Como administrador*, quiero corregir los datos administrativos (N° factura, CUFE, fechas) y las líneas de producto (descripción, cantidad, costo unitario, impuestos) recalculando automáticamente los totales acumulados en PostgreSQL.
+* **HU-13:** *Como administrador*, quiero eliminar facturas de compra obsoletas o duplicadas con confirmación modal de seguridad y eliminación en cascada de sus ítems asociados.
+* **HU-14:** *Como usuario del panel*, quiero buscar y filtrar reactivamente en tiempo real las facturas de compra por N° de factura, CUFE o proveedor usando Zustand sin recargar la página.
 
 ### Módulo de Métricas e Inventario
 * **HU-08:** *Como administrador*, quiero ver un resumen ejecutivo (KPIs) del total de compras, egresos del mes y balance operativo para tomar decisiones financieras rápidas.
@@ -52,6 +56,10 @@ Desarrollar una plataforma integral para Cigarrería Megalider compuesta por una
 | **CU-07** | Cerrar Sesión | Usuario autenticado | Sesión activa | Eliminación de cookie `auth_token` y redirección a `/login`. |
 | **CU-08** | Consumo de Endpoints BFF / APIs | Clientes API / Frontend | Petición HTTP a Route Handler | Respuesta estructurada (JSON, XML o Markdown) con cabeceras de seguridad. |
 | **CU-09** | Registro de Nuevo Cliente con reCAPTCHA | Cliente no registrado | Formulario diligenciado, políticas aceptadas y captcha resuelto | Creación en MySQL (`rol: CLIENTE`), emisión de JWT y redirección a `/`. |
+| **CU-10** | Ver Detalle de Factura | Admin / Superadmin | Factura registrada en PostgreSQL | Vista completa `/contabilidad/facturas/[id]` con tarjetas de emisor/receptor, CUFE compacto y tabla de ítems con `tfoot`. |
+| **CU-11** | Editar Factura e Ítems | Admin / Superadmin | Sesión activa Staff | Modificación de metadatos o ítems con recálculo automático y sincronización en BD (`recalcularTotalesFactura`). |
+| **CU-12** | Eliminar Factura de Compra | Admin / Superadmin | Confirmación en modal | Borrado en cascada en PostgreSQL y redirección a la lista. |
+| **CU-13** | Filtrado Reactivo en Cliente | Admin / Staff | Lista de facturas cargada | Filtrado en tiempo real en memoria usando `useFacturasFiltrosStore` de Zustand. |
 
 ---
 

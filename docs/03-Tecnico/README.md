@@ -17,6 +17,7 @@ Este documento contiene las especificaciones técnicas del stack, la configuraci
 | **Criptografía & Auth** | `jose` & `bcryptjs` | `^6.0.8` / `^3.0.2` | Firma de tokens JWT en Edge y hash de contraseñas. |
 | **Aislamiento Servidor** | `server-only` | `^0.0.1` | Garantiza que funciones criptográficas y DAL nunca se ejecuten en el cliente. |
 | **Proveedor OAuth** | Google OAuth 2.0 | API v3 | Autenticación federada segura sin contraseñas. |
+| **Estado Cliente** | `zustand` | `^5.0.3` | Estado inmutable, libre de `<Provider>` globales y persistencia en `localStorage`. |
 | **Iconografía** | `lucide-react` | `^1.35.0` | Iconos vectoriales para toda la UI. |
 | **Test Runner & Asserts** | `vitest` | `^4.1.11` | Ejecución de pruebas unitarias ultrarrápidas con soporte ESM. |
 | **DOM & UI Testing** | `@testing-library/react` & `jsdom` | `^16.3` / `^28.1` | Simulación de DOM para pruebas de componentes y eventos de usuario. |
@@ -203,4 +204,34 @@ El sistema cumple rigurosamente con las dos guías oficiales de autenticación d
   - `next/headers`: `cookies()` asíncrono (`get`, `set`, `delete`).
   - `next/cache`: `revalidatePath`, `revalidateTag`.
   - `@/lib/db/mysql`: Mocking tipado de Drizzle ORM queries (`findFirst`, `insert`).
+
+---
+
+## 🛒 13. Gestión de Estado Global Cliente (Zustand Stores)
+
+* **Store de Filtros de Facturas (`lib/stores/use-facturas-filtros-store.ts`):**
+  - **Estado:** `busqueda: string`, `fechaInicio`, `fechaFin`, `proveedorFiltro`.
+  - **Acciones:** `setBusqueda()`, `setFechaInicio()`, `setFechaFin()`, `setProveedorFiltro()`, `resetFiltros()`.
+  - **Uso:** Filtrado reactivo en tiempo real en la lista de facturas sin recargar la página ni realizar llamadas redundantes al servidor.
+
+---
+
+## 📄 14. Módulo de Contabilidad y Facturas de Compra de Mercancía
+
+* **Propósito:** Gestión, auditoría, corrección y control tributario de las facturas de compra procesadas por Hermes IA y cargadas manualmente al sistema.
+* **Componentes y Rutas:**
+  - `app/(admin)/contabilidad/facturas/page.tsx`: Server Component de entrada que consulta PostgreSQL (`getFacturas()`) y pasa las facturas a `FacturasTablaInteractive`.
+  - `app/(admin)/contabilidad/facturas/FacturasTablaInteractive.tsx`: Client Component con consumo granular de `useFacturasFiltrosStore` de Zustand para filtrado reactivo por N° de factura, CUFE, proveedor o NIT.
+  - `app/(admin)/contabilidad/facturas/[id]/page.tsx`: Server Component de detalle dinámico (`await params`) con resumen de proveedor/adquiriente, CUFE compacto, recálculo automático de ítems y tabla con `tfoot` pegajoso (*sticky*).
+  - `ModalEditarFactura.tsx`: Modal para corrección de datos identificativos de la factura.
+  - `ModalEditarFacturaItem.tsx`: Modal para crear, editar o eliminar líneas de producto recalculando el total en tiempo real.
+  - `BotonEliminarFactura.tsx`: Confirmación de borrado en cascada.
+  - `BotonCopiarCufe.tsx`: Copiado interactivo de código CUFE al portapapeles.
+* **Servicios y Sincronización en BD (`services/contabilidad.service.ts`):**
+  - `getFacturas()` & `getFacturaDetalle(facturaId)`: Consultas ORM con relaciones (`proveedor`, `items`).
+  - `actualizarFactura(facturaId, datos)`: Edición de metadatos de la factura.
+  - `eliminarFactura(facturaId)`: Eliminación de factura con borrado en cascada en PostgreSQL.
+  - `recalcularTotalesFactura(facturaId)`: Función auxiliar ejecutada tras cada mutación de ítems para recalcular y actualizar en tiempo real los campos `subtotal`, `iva`, `impoconsumo`, `otros_impuestos_total` y `total_factura` en PostgreSQL.
+  - `actualizarFacturaItem()`, `crearFacturaItem()`, `eliminarFacturaItem()`: Gestión de líneas de producto sincronizadas.
+
 

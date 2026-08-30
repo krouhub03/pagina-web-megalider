@@ -219,3 +219,14 @@ El patrón BFF en Next.js desacopla la UI de los servicios y bases de datos inte
 
 - **Límites de Cliente Aislados:** Telemetría instrumentada en componentes cliente dedicados (`useReportWebVitals`) sin convertir páginas o layouts en Client Components.
 - **Envío No Bloqueante:** Uso prioritario de `navigator.sendBeacon()` o `fetch(..., { keepalive: true })` para garantizar la entrega de métricas sin impactar el hilo principal de renderizado.
+
+---
+
+## 🛒 9. Arquitectura de Estado Cliente (Zustand)
+
+El estado interactivo del cliente (como el carrito de compras e interacciones de UI) se gestiona mediante **Zustand** siguiendo tres principios de diseño:
+
+1. **Aislamiento de Client Components:** El estado global no requiere envolver la aplicación en un `<Provider>`. Esto permite que los `layout.tsx` y `page.tsx` se mantengan como Server Components de alto rendimiento.
+2. **Suscrípción por Selectores:** Los componentes solo se re-renderizan cuando cambia la porción de estado que están escuchando expresamente (`useCartStore((state) => state.getTotalItems())`).
+3. **Persistencia Transparente:** La sincronización con `localStorage` está aislada mediante un adaptador `safeStorage` que evita errores de desincronización (hydration mismatch) y fallos en entornos sin DOM (SSR y pruebas de servidor).
+

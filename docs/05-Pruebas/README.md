@@ -26,6 +26,10 @@ Este directorio contiene los planes de prueba, matrices de validación automatiz
 | **CP-16** | Registro de Cliente y Políticas de Datos | Autenticación | Enviar formulario en `/register` con políticas aceptadas y contraseñas válidas. | Inserción en MySQL con rol `CLIENTE`, emisión de JWT y redirección a `/`. | ✅ PASÓ |
 | **CP-17** | Verificación de Google reCAPTCHA v2 | Seguridad | Enviar formulario de registro con token de reCAPTCHA. | Validación del token con Google siteverify y bloqueo si el token es nulo o inválido. | ✅ PASÓ |
 | **CP-18** | Prevención de Correo Duplicado | Autenticación | Intentar registrar un correo electrónico ya existente en la base de datos. | Mensaje de error claro "Ya existe una cuenta registrada con este correo" sin duplicar filas. | ✅ PASÓ |
+| **CP-19** | Navegación y Detalle de Factura | Contabilidad | Acceder a `/contabilidad/facturas/[id]`. | Muestra emisor/receptor, CUFE compacto con botón de copia, ítems y fila de totales `tfoot`. | ✅ PASÓ |
+| **CP-20** | Modificación de Factura e Ítems | Contabilidad | Editar metadatos o agregar/editar/eliminar una línea en el modal de ítem. | Actualización instantánea en UI y recálculo automático de totales en PostgreSQL (`recalcularTotalesFactura`). | ✅ PASÓ |
+| **CP-21** | Eliminación de Factura | Contabilidad | Confirmar eliminación en el modal de borrado. | Eliminación en cascada en PostgreSQL y redirección inmediata a `/contabilidad/facturas`. | ✅ PASÓ |
+| **CP-22** | Filtrado Reactivo con Zustand | Contabilidad | Ingresar texto en la barra de búsqueda de facturas. | Filtrado reactivo en tiempo real por N° factura, CUFE, proveedor o NIT sin recargar página. | ✅ PASÓ |
 
 ---
 

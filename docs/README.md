@@ -40,3 +40,5 @@ El proyecto cuenta con un conjunto de skills especializadas ubicadas en `.agents
 * [`nextjs-lazy-loading`](../.agents/skills/nextjs-lazy-loading/SKILL.md): Patrones de carga diferida con `next/dynamic`, `import()` y magic comments.
 * [`nextjs-bff`](../.agents/skills/nextjs-bff/SKILL.md): Arquitectura Backend for Frontend, Route Handlers y negociación de contenido.
 * [`nextjs-unit-testing`](../.agents/skills/nextjs-unit-testing/SKILL.md): Patrones de diseño y ejecución de pruebas unitarias con Vitest, React Testing Library, mocks de Next.js 16 y autenticación.
+* [`nextjs-zustand`](../.agents/skills/nextjs-zustand/SKILL.md): Reglas de arquitectura, diseño de stores (`lib/stores/`), persistencia transparente y pruebas unitarias de estado cliente con Zustand.
+
