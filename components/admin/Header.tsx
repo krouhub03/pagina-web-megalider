@@ -3,7 +3,6 @@
 import React, { useTransition } from "react";
 import { Bell, ShieldCheck, LogOut } from "lucide-react";
 import { logoutAction } from "@/services/auth.service";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 
 export default function AdminHeader() {
@@ -17,12 +16,7 @@ export default function AdminHeader() {
 
   return (
     <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
-      {/* Indicador de estado de Hermes IA */}
-      <div className="flex items-center gap-3">
-        <Badge variant="mint" dot>
-          Hermes IA: Conectado a PostgreSQL
-        </Badge>
-      </div>
+      <div className="flex items-center gap-3"></div>
 
       {/* Controles de usuario */}
       <div className="flex items-center gap-3 sm:gap-4">

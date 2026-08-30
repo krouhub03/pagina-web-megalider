@@ -29,11 +29,6 @@ const CartDrawer = dynamic(
   { ssr: false }
 );
 
-const AgeVerificationGate = dynamic(
-  () => import("./AgeVerificationGate").then((mod) => mod.AgeVerificationGate),
-  { ssr: false }
-);
-
 export interface SessionUser {
   id: number;
   nombre: string;
@@ -141,20 +136,6 @@ export default function PublicNavbar({ session }: PublicNavbarProps) {
 
           {/* Desktop & Tablet Top Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Botón Carrito con Badge */}
-            <button
-              type="button"
-              onClick={() => toggleCart()}
-              aria-label="Ver Carrito de Compras"
-              className="relative p-2 rounded-xl text-slate-700 hover:text-[#067335] hover:bg-slate-100/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#067335] cursor-pointer"
-            >
-              <ShoppingBag className="w-5 h-5 text-[#067335]" />
-              {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-amber-400 text-emerald-950 font-bold text-[10px] rounded-full w-4 h-4 flex items-center justify-center border border-white shadow-2xs">
-                  {totalItems}
-                </span>
-              )}
-            </button>
             {session ? (
               /* Usuario Autenticado */
               <div className="flex items-center gap-2 sm:gap-3">
@@ -481,9 +462,6 @@ export default function PublicNavbar({ session }: PublicNavbarProps) {
 
       {/* Drawer del Carrito */}
       <CartDrawer />
-
-      {/* Gate de Verificación de Edad +18 */}
-      <AgeVerificationGate />
     </>
   );
 }

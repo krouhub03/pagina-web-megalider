@@ -9,7 +9,6 @@ import {
   Receipt,
   Wallet,
   Bot,
-  Package,
   Users,
   ExternalLink,
   ChevronRight,
@@ -58,11 +57,6 @@ const navSections: NavSection[] = [
   {
     title: "Web",
     items: [
-      {
-        name: "Catálogo de Productos",
-        href: "/catalogo",
-        icon: Package,
-      },
       {
         name: "Usuarios y Roles",
         href: "/usuarios",

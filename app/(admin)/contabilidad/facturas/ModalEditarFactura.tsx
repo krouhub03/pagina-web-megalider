@@ -140,113 +140,158 @@ export function ModalEditarFactura({
                 <span>{error}</span>
               </div>
             )}
-
             {/* Formulario */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label htmlFor="numeroFactura" className="block text-xs font-semibold text-slate-700 mb-1">
                     N° Factura *
                   </label>
                   <Input
+                    id="numeroFactura"
                     name="numeroFactura"
                     value={formData.numeroFactura}
                     onChange={handleChange}
+                    aria-describedby="numeroFactura-help"
+                    title="Número consecutivo oficial asignado a la factura"
                     required
                   />
+                  <p id="numeroFactura-help" className="mt-1 text-[11px] text-slate-500">
+                    Número consecutivo oficial impreso en el comprobante fiscal.
+                  </p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label htmlFor="documentoReferencia" className="block text-xs font-semibold text-slate-700 mb-1">
                     Doc. Referencia
                   </label>
                   <Input
+                    id="documentoReferencia"
                     name="documentoReferencia"
                     value={formData.documentoReferencia}
                     onChange={handleChange}
                     placeholder="Ej. PED-2026-01"
+                    aria-describedby="documentoReferencia-help"
+                    title="Número de pedido u orden de compra relacionada"
                   />
+                  <p id="documentoReferencia-help" className="mt-1 text-[11px] text-slate-500">
+                    Número de pedido, orden de compra o remisión vinculada.
+                  </p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label htmlFor="fechaEmision" className="block text-xs font-semibold text-slate-700 mb-1">
                     Fecha Emisión *
                   </label>
                   <Input
+                    id="fechaEmision"
                     type="date"
                     name="fechaEmision"
                     value={formData.fechaEmision}
                     onChange={handleChange}
+                    aria-describedby="fechaEmision-help"
+                    title="Fecha original en la que se generó la factura"
                     required
                   />
+                  <p id="fechaEmision-help" className="mt-1 text-[11px] text-slate-500">
+                    Fecha oficial en la que el proveedor expidió la factura.
+                  </p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label htmlFor="fechaVencimiento" className="block text-xs font-semibold text-slate-700 mb-1">
                     Fecha Vencimiento
                   </label>
                   <Input
+                    id="fechaVencimiento"
                     type="date"
                     name="fechaVencimiento"
                     value={formData.fechaVencimiento}
                     onChange={handleChange}
+                    aria-describedby="fechaVencimiento-help"
+                    title="Fecha límite pactada para realizar el pago"
                   />
+                  <p id="fechaVencimiento-help" className="mt-1 text-[11px] text-slate-500">
+                    Fecha límite acordada para realizar el pago completo.
+                  </p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label htmlFor="medioPago" className="block text-xs font-semibold text-slate-700 mb-1">
                     Medio de Pago
                   </label>
                   <Input
+                    id="medioPago"
                     name="medioPago"
                     value={formData.medioPago}
                     onChange={handleChange}
                     placeholder="Ej. Transferencia Bancaria, Crédito"
+                    aria-describedby="medioPago-help"
+                    title="Instrumento o canal financiero utilizado para el pago"
                   />
+                  <p id="medioPago-help" className="mt-1 text-[11px] text-slate-500">
+                    Canal empleado (ej. Transferencia, Efectivo, Crédito).
+                  </p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label htmlFor="condicionPago" className="block text-xs font-semibold text-slate-700 mb-1">
                     Condición de Pago
                   </label>
                   <Input
+                    id="condicionPago"
                     name="condicionPago"
                     value={formData.condicionPago}
                     onChange={handleChange}
                     placeholder="Ej. Contado, 30 días"
+                    aria-describedby="condicionPago-help"
+                    title="Modalidad o plazo acordado de la obligación"
                   />
+                  <p id="condicionPago-help" className="mt-1 text-[11px] text-slate-500">
+                    Plazo acordado con el emisor (ej. Contado, 30 días).
+                  </p>
                 </div>
               </div>
 
               {/* CUFE */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label htmlFor="cufe" className="block text-xs font-semibold text-slate-700 mb-1">
                   Código Único CUFE
                 </label>
                 <Input
+                  id="cufe"
                   name="cufe"
                   value={formData.cufe}
                   onChange={handleChange}
                   placeholder="Código hexadecimal CUFE..."
+                  aria-describedby="cufe-help"
+                  title="Código alfanumérico fiscal de Factura Electrónica"
                   className="font-mono text-xs"
                 />
+                <p id="cufe-help" className="mt-1 text-[11px] text-slate-500">
+                  Cadena única hexadecimal de la DIAN que valida la factura electrónica.
+                </p>
               </div>
-
-
 
               {/* Observaciones */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label htmlFor="observaciones" className="block text-xs font-semibold text-slate-700 mb-1">
                   Observaciones / Motivo de Corrección
                 </label>
                 <textarea
+                  id="observaciones"
                   name="observaciones"
                   rows={2}
                   value={formData.observaciones}
                   onChange={handleChange}
                   placeholder="Anota cualquier observación o corrección realizada..."
+                  aria-describedby="observaciones-help"
+                  title="Justificación o detalles adicionales sobre la corrección realizada"
                   className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#038C3E]/30 focus:border-[#038C3E] text-slate-800 resize-none"
                 />
+                <p id="observaciones-help" className="mt-1 text-[11px] text-slate-500">
+                  Registra el motivo del ajuste o notas importantes para contabilidad.
+                </p>
               </div>
 
               {/* Acciones Modal */}
