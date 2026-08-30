@@ -18,6 +18,8 @@ Este documento contiene las especificaciones técnicas del stack, la configuraci
 | **Aislamiento Servidor** | `server-only` | `^0.0.1` | Garantiza que funciones criptográficas y DAL nunca se ejecuten en el cliente. |
 | **Proveedor OAuth** | Google OAuth 2.0 | API v3 | Autenticación federada segura sin contraseñas. |
 | **Iconografía** | `lucide-react` | `^1.35.0` | Iconos vectoriales para toda la UI. |
+| **Test Runner & Asserts** | `vitest` | `^4.1.11` | Ejecución de pruebas unitarias ultrarrápidas con soporte ESM. |
+| **DOM & UI Testing** | `@testing-library/react` & `jsdom` | `^16.3` / `^28.1` | Simulación de DOM para pruebas de componentes y eventos de usuario. |
 
 ---
 
@@ -180,3 +182,25 @@ El sistema cumple rigurosamente con las dos guías oficiales de autenticación d
   - [`nextjs-analytics`](../../.agents/skills/nextjs-analytics/SKILL.md)
   - [`nextjs-lazy-loading`](../../.agents/skills/nextjs-lazy-loading/SKILL.md)
   - [`nextjs-bff`](../../.agents/skills/nextjs-bff/SKILL.md)
+  - [`nextjs-unit-testing`](../../.agents/skills/nextjs-unit-testing/SKILL.md)
+
+---
+
+## 🧪 12. Arquitectura de Pruebas Unitarias (Vitest + Testing Library)
+
+* **Entorno y Ejecución:**
+  - Configuración centralizada en [`vitest.config.mts`](../../vitest.config.mts) con aliases para `@/*`, `server-only` y `client-only`.
+  - Entorno de ejecución dual: `node` por defecto para servicios/criptografía y `// @vitest-environment jsdom` para componentes UI de React.
+  - Setup global en [`tests/setup.ts`](../../tests/setup.ts) con `@testing-library/jest-dom` y variables de entorno seguras para tests.
+* **Comandos Disponibles:**
+  ```bash
+  npm test              # Ejecución completa en lote (CI/CD)
+  npm run test:watch    # Modo interactivo para desarrollo
+  npm run test:coverage # Análisis y reporte de cobertura de código
+  ```
+* **Mocks Canónicos para Next.js 16 (App Router):**
+  - `next/navigation`: `useRouter` (`push`, `refresh`), `useSearchParams` (`get`).
+  - `next/headers`: `cookies()` asíncrono (`get`, `set`, `delete`).
+  - `next/cache`: `revalidatePath`, `revalidateTag`.
+  - `@/lib/db/mysql`: Mocking tipado de Drizzle ORM queries (`findFirst`, `insert`).
+

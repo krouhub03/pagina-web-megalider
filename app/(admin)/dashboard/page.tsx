@@ -32,12 +32,12 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/admin/contabilidad/facturas">
+          <Link href="/contabilidad/facturas">
             <Button variant="primary" size="sm" leftIcon={<Receipt className="w-4 h-4" />}>
               Gestionar Facturas
             </Button>
           </Link>
-          <Link href="/admin/contabilidad/gastos">
+          <Link href="/contabilidad/gastos">
             <Button variant="secondary" size="sm" leftIcon={<Wallet className="w-4 h-4" />}>
               Ver Egresos
             </Button>
@@ -155,7 +155,7 @@ export default async function DashboardPage() {
                 </p>
               </div>
             </div>
-            <Link href="/admin/hermes-logs">
+            <Link href="/hermes-logs">
               <Button variant="ghost" size="sm" rightIcon={<ArrowUpRight className="w-3.5 h-3.5" />}>
                 Ver auditoría
               </Button>
@@ -182,7 +182,7 @@ export default async function DashboardPage() {
           </h2>
           <div className="space-y-2.5">
             <Link
-              href="/admin/contabilidad/facturas"
+              href="/contabilidad/facturas"
               className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:border-[#53A677]/40 hover:bg-[#A7D9BD]/10 transition-all text-xs font-semibold text-slate-700 group"
             >
               <span className="flex items-center gap-2.5">
@@ -193,7 +193,7 @@ export default async function DashboardPage() {
             </Link>
 
             <Link
-              href="/admin/contabilidad/gastos"
+              href="/contabilidad/gastos"
               className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:border-[#53A677]/40 hover:bg-[#A7D9BD]/10 transition-all text-xs font-semibold text-slate-700 group"
             >
               <span className="flex items-center gap-2.5">
@@ -204,7 +204,7 @@ export default async function DashboardPage() {
             </Link>
 
             <Link
-              href="/admin/catalogo"
+              href="/catalogo"
               className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:border-[#53A677]/40 hover:bg-[#A7D9BD]/10 transition-all text-xs font-semibold text-slate-700 group"
             >
               <span className="flex items-center gap-2.5">

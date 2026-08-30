@@ -2,14 +2,16 @@ import "server-only";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-const JWT_SECRET = process.env.NEXTAUTH_SECRET || "megalider_super_secret_jwt_key_2026_x7a9q";
-const secretKey = new TextEncoder().encode(JWT_SECRET);
+function getSecretKey() {
+  const secret = process.env.NEXTAUTH_SECRET || "megalider_super_secret_jwt_key_2026_x7a9q";
+  return new TextEncoder().encode(secret);
+}
 
 export interface UserSessionPayload {
   id: number;
   nombre: string;
   email: string;
-  rol: "SUPERADMIN" | "ADMIN" | "CAJERO" | "CLIENTE";
+  rol: "SUPERADMIN" | "ADMIN" | "CLIENTE";
   avatarUrl?: string | null;
 }
 
@@ -19,13 +21,13 @@ export async function signJWT(payload: UserSessionPayload, expiresIn = "7d"): Pr
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(expiresIn)
-    .sign(secretKey);
+    .sign(getSecretKey());
 }
 
 // 2. Verificar Token JWT
 export async function verifyJWT(token: string): Promise<UserSessionPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, secretKey);
+    const { payload } = await jwtVerify(token, getSecretKey());
     return payload as unknown as UserSessionPayload;
   } catch {
     return null;

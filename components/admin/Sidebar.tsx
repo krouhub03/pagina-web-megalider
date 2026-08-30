@@ -30,28 +30,28 @@ const navItems: NavItem[] = [
   },
   {
     name: "Facturas de Compra",
-    href: "/admin/contabilidad/facturas",
+    href: "/contabilidad/facturas",
     icon: Receipt,
   },
   {
     name: "Egresos y Gastos",
-    href: "/admin/contabilidad/gastos",
+    href: "/contabilidad/gastos",
     icon: Wallet,
   },
   {
     name: "Auditoría Hermes IA",
-    href: "/admin/hermes-logs",
+    href: "/hermes-logs",
     icon: Bot,
     badge: "Activo",
   },
   {
     name: "Catálogo de Productos",
-    href: "/admin/catalogo",
+    href: "/catalogo",
     icon: Package,
   },
   {
     name: "Usuarios y Roles",
-    href: "/admin/usuarios",
+    href: "/usuarios",
     icon: Users,
   },
 ];

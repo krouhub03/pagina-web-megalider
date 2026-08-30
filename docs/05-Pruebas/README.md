@@ -1,10 +1,10 @@
 # 05 - Registro de Casos de Prueba y Resultados
 
-Este directorio contiene los planes de prueba, matrices de validación y los resultados de las pruebas realizadas sobre el sistema de **Cigarrería Megalider**.
+Este directorio contiene los planes de prueba, matrices de validación automatizadas y los resultados de las pruebas unitarias y de integración realizadas sobre el sistema de **Cigarrería Megalider**.
 
 ---
 
-## 🧪 1. Matriz de Casos de Prueba
+## 🧪 1. Matriz General de Casos de Prueba (Integración y Sistema)
 
 | ID | Caso de Prueba | Módulo | Procedimiento | Resultado Esperado | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -29,36 +29,55 @@ Este directorio contiene los planes de prueba, matrices de validación y los res
 
 ---
 
-## 📊 2. Evidencias de Resultados de Pruebas
+## ⚡ 2. Matriz de Pruebas Unitarias Automatizadas (Vitest + Testing Library)
 
-### Prueba CP-08, CP-09 y CP-10 (Google OAuth 2.0 y Control RBAC):
-```text
-✓ Endpoint /api/auth/google genera cookie HttpOnly oauth_state con TTL 10m
-✓ Endpoint /api/auth/google/callback valida state anti-CSRF con éxito
-✓ Sincronización en MySQL asigna rol "CLIENTE" a usuarios nuevos por defecto
-✓ Middleware en Edge valida payload.rol del JWT:
-  - Si rol === "CLIENTE" en ruta protegida -> Redirección inmediata a "/"
-  - Si rol in ["SUPERADMIN", "ADMIN", "CAJERO"] -> Acceso permitido a "/dashboard"
+Las pruebas unitarias automatizadas se ejecutan con el runner **Vitest** y **React Testing Library** en entornos aislados (`node` y `jsdom`).
+
+| Suite de Prueba | Archivo de Prueba | Escenarios Evaluados | Total Tests | Estado |
+| :--- | :--- | :--- | :---: | :---: |
+| **Servicio de Autenticación** | `tests/unit/services/auth.service.test.ts` | • Validación de campos requeridos vacíos en login y registro.<br>• Usuario inexistente / no registrado.<br>• Cuenta inactiva.<br>• Cuenta registrada únicamente con Google (sin hash de contraseña).<br>• Validación de contraseña incorrecta con `bcrypt`.<br>• Login exitoso con emisión de JWT y cookie HttpOnly `auth_token`.<br>• Longitud mínima de nombre y contraseña (>= 8 caracteres).<br>• Validación de formato de correo electrónico.<br>• Coincidencia entre contraseña y confirmación.<br>• Aceptación obligatoria de políticas de tratamiento de datos (Ley 1581).<br>• Validación de token reCAPTCHA.<br>• Prevención de registro con correo duplicado.<br>• Registro exitoso con inserción de rol `CLIENTE` en MySQL. | 14 | ✅ PASÓ |
+| **Componente de UI: Login** | `tests/unit/components/auth/LoginPage.test.tsx` | • Renderizado de campos (email, password), botones y Google OAuth.<br>• Captura y renderizado de errores provenientes de parámetros URL (`google_access_denied`, etc.).<br>• Alternancia de visibilidad de contraseña (Eye / EyeOff).<br>• Renderizado de alertas de error devueltas por `loginWithCredentials`.<br>• Redirección a la URL de origen (`from`) y refresco de ruta (`router.push`, `router.refresh`). | 5 | ✅ PASÓ |
+| **Componente de UI: Registro** | `tests/unit/components/auth/RegisterPage.test.tsx` | • Renderizado de campos completos y widget de seguridad.<br>• Alerta de validación al enviar formulario sin aceptar políticas de privacidad.<br>• Alerta de validación al enviar sin resolver reCAPTCHA.<br>• Invocación de `registerUserAction` y redirección a `/` tras éxito.<br>• Presentación de mensajes de error devueltos por el servidor. | 5 | ✅ PASÓ |
+| **Tokens JWT y Sesiones** | `tests/unit/lib/jwt.test.ts` | • Firma de JWT con algoritmo `HS256` y expiración.<br>• Verificación de firma y decodificación de payload con roles.<br>• Rechazo y retorno `null` ante tokens corruptos o manipulados.<br>• Extracción de sesión activa desde cookies del servidor (`getSession`). | 4 | ✅ PASÓ |
+| **Google reCAPTCHA v2** | `tests/unit/lib/recaptcha.test.ts` | • Rechazo ante token vacío con clave configurada.<br>• Validación exitosa ante respuesta `success: true` de Google siteverify.<br>• Manejo de tokens expirados o con error devuelto por la API.<br>• Manejo seguro de fallos de conexión o timeout de red. | 4 | ✅ PASÓ |
+| **Utilidades y Formateadores** | `tests/unit/lib/utils.test.ts` | • Fusión de clases Tailwind con resolución de conflictos (`cn`).<br>• Formateo de moneda colombiana `COP` con separador de miles sin decimales.<br>• Manejo de valores `null`, `undefined` y cadenas no numéricas en moneda.<br>• Formateo de fechas para Colombia (`es-CO`) y retorno de raya ante entradas vacías. | 6 | ✅ PASÓ |
+
+**Total de Pruebas Unitarias:** **38 tests (100% pasados en 6 archivos)**
+
+---
+
+## 🚀 3. Ejecución de Pruebas Automatizadas
+
+```bash
+# Ejecutar todas las pruebas unitarias una sola vez
+npm test
+
+# Ejecutar pruebas en modo observador (Watch Mode)
+npm run test:watch
+
+# Ejecutar pruebas y generar reporte de cobertura de código
+npm run test:coverage
 ```
 
-### Prueba CP-01 y CP-11 (Lectura en vivo de PostgreSQL Hermes):
-```text
-✓ Base de datos: cmegalider
-✓ Total Compras: $670.178 COP (1 factura con 30 items)
-✓ Total Egresos: $158.800 COP (4 egresos registrados por Hermes Bot)
-✓ Historial de correcciones: 2 modificaciones previas detectadas
-```
+---
 
-### Prueba CP-03 (Autenticación MySQL + JWT):
-```text
-✓ Usuario verificado: admin@megalider.com (Rol: SUPERADMIN)
-✓ Hash bcrypt validado correctamente
-✓ Token JWT generado y guardado en cookie HttpOnly "auth_token"
-```
+## 📊 4. Evidencias de Resultados de Pruebas Unitarias
 
-### Prueba CP-12 (Next.js TypeScript Validation):
 ```text
-▲ Next.js 16.3.3
-✓ TypeScript validation passed (0 errors)
-✓ 100% routes generated (Static / Dynamic)
+> pagina-web-megalider@0.1.0 test
+> vitest run
+
+ RUN  v4.1.11 C:/Users/BrianKrou/OneDrive/Documentos/PROYECTOS - JBone/Megalider/pagina-web-megalider
+
+ ✓ tests/unit/lib/utils.test.ts (6 tests)
+ ✓ tests/unit/lib/jwt.test.ts (4 tests)
+ ✓ tests/unit/lib/recaptcha.test.ts (4 tests)
+ ✓ tests/unit/services/auth.service.test.ts (14 tests)
+ ✓ tests/unit/components/auth/LoginPage.test.tsx (5 tests)
+ ✓ tests/unit/components/auth/RegisterPage.test.tsx (5 tests)
+
+ Test Files  6 passed (6)
+      Tests  38 passed (38)
+   Start at  20:02:20
+   Duration  42.47s
 ```

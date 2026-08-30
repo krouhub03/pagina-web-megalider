@@ -14,7 +14,7 @@ import {
 import { relations } from "drizzle-orm";
 
 // 1. Roles del Sistema
-export const roleEnum = mysqlEnum("rol", ["SUPERADMIN", "ADMIN", "CAJERO", "CLIENTE"]);
+export const roleEnum = mysqlEnum("rol", ["SUPERADMIN", "ADMIN", "CLIENTE"]);
 
 // 2. Tabla de Usuarios Administrativos y Operativos
 export const usuarios = mysqlTable(

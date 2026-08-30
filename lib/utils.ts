@@ -14,17 +14,17 @@ export function formatCurrency(value: string | number | null | undefined): strin
   }).format(isNaN(num) ? 0 : num);
 }
 
-export function formatDate(dateString: string | null | undefined): string {
-  if (!dateString) return "—";
+export function formatDate(dateInput: string | Date | null | undefined): string {
+  if (!dateInput) return "—";
   try {
-    const d = new Date(dateString);
-    if (isNaN(d.getTime())) return dateString;
+    const d = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+    if (isNaN(d.getTime())) return typeof dateInput === "string" ? dateInput : "—";
     return d.toLocaleDateString("es-CO", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
   } catch {
-    return dateString;
+    return typeof dateInput === "string" ? dateInput : "—";
   }
 }

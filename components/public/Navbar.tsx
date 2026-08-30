@@ -41,13 +41,15 @@ export default function PublicNavbar({ session }: PublicNavbarProps) {
 
   // Roles autorizados para ingresar al Panel Administrativo
   const isStaff = Boolean(
-    session && ["SUPERADMIN", "ADMIN", "CAJERO"].includes(session.rol)
+    session && ["SUPERADMIN", "ADMIN"].includes(session.rol)
   );
 
-  // Cerrar menú al cambiar de ruta
-  useEffect(() => {
+  // Cerrar menú al cambiar de ruta ajustando estado en render
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
     setIsOpen(false);
-  }, [pathname]);
+  }
 
   // Evitar scroll en el body cuando el menú móvil está abierto
   useEffect(() => {

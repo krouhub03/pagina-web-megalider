@@ -17,7 +17,7 @@ export default async function AdminLayout({
   }
 
   // Si el usuario es de rol CLIENTE o no autorizado, bloquear y redirigir al inicio público
-  const staffRoles = ["SUPERADMIN", "ADMIN", "CAJERO"];
+  const staffRoles = ["SUPERADMIN", "ADMIN"];
   if (!staffRoles.includes(session.rol)) {
     redirect("/");
   }
