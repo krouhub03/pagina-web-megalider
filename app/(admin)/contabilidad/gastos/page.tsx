@@ -1,17 +1,48 @@
 import React from "react";
 import Link from "next/link";
-import { getEgresosTienda } from "@/services/contabilidad.service";
-import { Wallet, Search, Bot, User, CheckCircle2, History, Calendar } from "lucide-react";
+import {
+  getEgresosTienda,
+  getMetricasContables,
+  getCategoriasGastos,
+  getPucCuentas,
+} from "@/services/contabilidad.service";
+import { Wallet, Bot, UserCheck, History, ArrowUpRight } from "lucide-react";
 import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-import { Input } from "@/components/ui/Input";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
+import { GastosTablaInteractive, EgresoItem } from "./GastosTablaInteractive";
 
 export const dynamic = "force-dynamic";
 
 export default async function GastosPage() {
-  const result = await getEgresosTienda();
-  const egresos = result.data || [];
+  const [egresosRes, metricasRes, categoriasRes, pucRes] = await Promise.all([
+    getEgresosTienda(),
+    getMetricasContables(),
+    getCategoriasGastos(),
+    getPucCuentas(),
+  ]);
+
+  const egresos = (egresosRes.data || []) as unknown as EgresoItem[];
+  const metricas = metricasRes.data || {
+    totalCompras: 0,
+    conteoFacturas: 0,
+    totalEgresos: 0,
+    conteoEgresos: 0,
+    egresosPorHermes: 0,
+  };
+  const categorias = categoriasRes.data || [];
+  const pucCuentas = pucRes.data || [];
+
+  const egresosHermesCount = egresos.filter(
+    (e) =>
+      e.registradoPor?.toLowerCase().includes("hermes") ||
+      e.registradoPor?.toLowerCase().includes("bot") ||
+      e.origen?.toLowerCase().includes("hermes")
+  ).length;
+
+  const egresosManualesCount = egresos.length - egresosHermesCount;
+  const egresosAuditadosCount = egresos.filter(
+    (e) => (e.correcciones?.length || 0) > 0
+  ).length;
 
   return (
     <div className="space-y-6">
@@ -19,11 +50,15 @@ export default async function GastosPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-            <Link href="/dashboard" className="hover:text-slate-800">
+            <Link href="/dashboard" className="hover:text-slate-800 transition-colors">
               Dashboard
             </Link>
             <span>/</span>
-            <span>Contabilidad</span>
+            <Link href="/contabilidad" className="hover:text-slate-800 transition-colors">
+              Contabilidad
+            </Link>
+            <span>/</span>
+            <span className="text-slate-900 font-bold">Gastos</span>
           </div>
           <h1 className="text-2xl font-serif font-bold text-slate-900">
             Egresos y Gastos de Tienda
@@ -34,116 +69,105 @@ export default async function GastosPage() {
         </div>
       </div>
 
-      {/* Main Table Card */}
-      <Card className="overflow-hidden">
-        {/* Filter bar */}
-        <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
-          <div className="w-full max-w-md">
-            <Input
-              type="text"
-              placeholder="Buscar por descripción, proveedor o comprobante..."
-              leftIcon={<Search className="w-4 h-4" />}
-            />
-          </div>
-          <div className="text-xs text-slate-500 font-medium">
-            Total: <span className="font-bold text-slate-800">{egresos.length}</span> egresos
-          </div>
-        </div>
-
-        {/* Table */}
-        {egresos.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center mb-3">
-              <Wallet className="w-6 h-6" />
+      {/* KPI Resumen Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Metric 1: Total Egresos */}
+        <Card className="p-4 bg-white border border-slate-200">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              Total Egresos
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+              <Wallet className="w-4 h-4" />
             </div>
-            <h3 className="text-sm font-bold text-slate-700">No hay egresos registrados aún</h3>
-            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-              Los gastos operativos registrados por Hermes Bot o de forma manual aparecerán aquí con su respectivo historial de cambios.
-            </p>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold uppercase tracking-wider text-[10px]">
-                <tr>
-                  <th className="p-4">Fecha</th>
-                  <th className="p-4">Tipo / PUC</th>
-                  <th className="p-4">Descripción & Proveedor</th>
-                  <th className="p-4">Origen</th>
-                  <th className="p-4">Total Egreso</th>
-                  <th className="p-4 text-center">Auditoría</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {egresos.map((egreso) => {
-                  const esHermes =
-                    egreso.registradoPor?.toLowerCase().includes("hermes") ||
-                    egreso.registradoPor?.toLowerCase().includes("bot");
-                  const tieneCorrecciones = (egreso.correcciones?.length || 0) > 0;
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-xl font-bold text-slate-900">
+              {formatCurrency(metricas.totalEgresos)}
+            </span>
+          </div>
+          <div className="mt-1 text-[11px] text-slate-500 flex items-center gap-1">
+            <span className="font-semibold text-slate-700">{egresos.length}</span> registros acumulados
+          </div>
+        </Card>
 
-                  return (
-                    <tr key={egreso.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="p-4 flex items-center gap-1.5 text-slate-600 font-medium whitespace-nowrap">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                        {formatDate(egreso.fechaEgreso)}
-                      </td>
-                      <td className="p-4">
-                        <Badge variant="neutral">
-                          {egreso.tipoEgreso}
-                        </Badge>
-                        {egreso.codigoPuc && (
-                          <div className="text-[10px] text-slate-400 mt-1 font-mono">
-                            PUC: {egreso.codigoPuc} - {egreso.puc?.nombre || ""}
-                          </div>
-                        )}
-                      </td>
-                      <td className="p-4 max-w-xs">
-                        <div className="font-semibold text-slate-800 line-clamp-1">
-                          {egreso.descripcion}
-                        </div>
-                        {egreso.proveedor && egreso.proveedor !== "null" && (
-                          <div className="text-[11px] text-slate-500 mt-0.5">
-                            {egreso.proveedor} {egreso.nitEmisor && egreso.nitEmisor !== "null" ? `(NIT: ${egreso.nitEmisor})` : ""}
-                          </div>
-                        )}
-                      </td>
-                      <td className="p-4 whitespace-nowrap">
-                        {esHermes ? (
-                          <Badge variant="blue" dot>
-                            <Bot className="w-3 h-3" />
-                            {egreso.registradoPor || "Hermes Bot"}
-                          </Badge>
-                        ) : (
-                          <Badge variant="neutral">
-                            <User className="w-3 h-3" />
-                            {egreso.registradoPor || "Manual"}
-                          </Badge>
-                        )}
-                      </td>
-                      <td className="p-4 font-bold text-slate-900 text-sm whitespace-nowrap">
-                        {formatCurrency(egreso.totalEgreso)}
-                      </td>
-                      <td className="p-4 text-center">
-                        {tieneCorrecciones ? (
-                          <Badge variant="amber">
-                            <History className="w-3 h-3" />
-                            {egreso.correcciones?.length} cambios
-                          </Badge>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-[11px] text-emerald-600 font-medium">
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            Original
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+        {/* Metric 2: Registrados por Hermes IA */}
+        <Card className="p-4 bg-white border border-slate-200">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              Hermes IA (Bot)
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
+              <Bot className="w-4 h-4" />
+            </div>
           </div>
-        )}
-      </Card>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-xl font-bold text-slate-900">
+              {egresosHermesCount}
+            </span>
+            <span className="text-xs text-blue-600 font-semibold flex items-center">
+              <ArrowUpRight className="w-3 h-3" />
+              {egresos.length > 0
+                ? Math.round((egresosHermesCount / egresos.length) * 100)
+                : 0}
+              %
+            </span>
+          </div>
+          <div className="mt-1 text-[11px] text-slate-500">
+            Capturas automáticas vía IA
+          </div>
+        </Card>
+
+        {/* Metric 3: Gastos Manuales */}
+        <Card className="p-4 bg-white border border-slate-200">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              Registros Manuales
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+              <UserCheck className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-xl font-bold text-slate-900">
+              {egresosManualesCount}
+            </span>
+          </div>
+          <div className="mt-1 text-[11px] text-slate-500">
+            Ingresados por administración
+          </div>
+        </Card>
+
+        {/* Metric 4: Egresos Auditados */}
+        <Card className="p-4 bg-white border border-slate-200">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              Egresos Auditados
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
+              <History className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-xl font-bold text-slate-900">
+              {egresosAuditadosCount}
+            </span>
+            {egresosAuditadosCount > 0 && (
+              <span className="text-xs text-amber-600 font-semibold">Con historial</span>
+            )}
+          </div>
+          <div className="mt-1 text-[11px] text-slate-500">
+            Con correcciones registradas
+          </div>
+        </Card>
+      </div>
+
+      {/* Main Interactive Table */}
+      <GastosTablaInteractive
+        egresos={egresos}
+        categorias={categorias}
+        pucCuentas={pucCuentas}
+      />
     </div>
   );
 }

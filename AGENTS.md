@@ -8,6 +8,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
+## Mandatory Skill Verification Rule
+- **Mandatory Skill Checking**: En CADA prompt o tarea recibida en cualquier conversación, DEBES verificar explícitamente la lista de `skills` disponibles y leer el `SKILL.md` de aquellas relevantes antes de generar respuestas o escribir código.
+
 ## Project Agent Guidelines & Skills
 - **Next.js AI Coding Standard**: Consultar la skill `.agents/skills/nextjs-coding/SKILL.md` para patrones de App Router, asincronía obligatoria (`params`, `cookies`, `headers`), Server/Client Components y ciclo de verificación.
 - **API Standardization & Security Standard**: Consultar la skill `.agents/skills/api-standard/SKILL.md` para reglas obligatorias de estandarización de API, contrato `ApiResponse<T>`, validación Zod, respuestas unificadas, comprobaciones timing-safe, cabeceras de seguridad y OpenAPI.

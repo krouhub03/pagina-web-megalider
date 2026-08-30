@@ -1,5 +1,5 @@
 import { dbPostgres, schema } from "@/lib/db/postgres";
-import { desc, eq, sql } from "drizzle-orm";
+import { asc, desc, eq, sql } from "drizzle-orm";
 
 export interface FiltrosFacturas {
   proveedorId?: number;
@@ -275,7 +275,7 @@ export async function corregirEgreso(params: {
   valorNuevo: string;
   motivo: string;
   corregidoPor: string;
-}) {
+}): Promise<{ success: boolean; error?: string }> {
   try {
     const result = await dbPostgres.transaction(async (tx) => {
       // Registrar en la tabla de auditoría
@@ -366,3 +366,96 @@ export async function getMetricasContables() {
     };
   }
 }
+
+// 6. Crear un nuevo egreso / gasto de tienda
+export interface CrearEgresoInput {
+  fechaEgreso: string;
+  tipoEgreso: string;
+  categoriaId: number;
+  codigoPuc?: string | null;
+  descripcion: string;
+  proveedor?: string | null;
+  nitEmisor?: string | null;
+  subtotal?: string;
+  iva?: string;
+  otrosImpuestos?: string;
+  totalEgreso: string;
+  tieneFactura?: boolean;
+  numeroComprobante?: string | null;
+  origen?: string;
+  registradoPor?: string;
+}
+
+export async function crearEgreso(datos: CrearEgresoInput) {
+  try {
+    const [nuevoEgreso] = await dbPostgres
+      .insert(schema.egresosTienda)
+      .values({
+        fechaEgreso: datos.fechaEgreso,
+        tipoEgreso: datos.tipoEgreso,
+        categoriaId: datos.categoriaId,
+        codigoPuc: datos.codigoPuc || null,
+        descripcion: datos.descripcion,
+        proveedor: datos.proveedor || null,
+        nitEmisor: datos.nitEmisor || null,
+        subtotal: datos.subtotal || "0",
+        iva: datos.iva || "0",
+        otrosImpuestos: datos.otrosImpuestos || "0",
+        totalEgreso: datos.totalEgreso,
+        tieneFactura: datos.tieneFactura ?? false,
+        numeroComprobante: datos.numeroComprobante || null,
+        origen: datos.origen || "manual",
+        registradoPor: datos.registradoPor || "Manual",
+      })
+      .returning();
+
+    return { success: true, data: nuevoEgreso };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
+    console.error("Error al crear egreso:", error);
+    return { success: false, error: message };
+  }
+}
+
+// 7. Eliminar egreso por ID
+export async function eliminarEgreso(egresoId: number) {
+  try {
+    await dbPostgres
+      .delete(schema.egresosTienda)
+      .where(eq(schema.egresosTienda.id, egresoId));
+    return { success: true };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
+    console.error(`Error al eliminar egreso #${egresoId}:`, error);
+    return { success: false, error: message };
+  }
+}
+
+// 8. Obtener lista de Categorías de Gastos
+export async function getCategoriasGastos() {
+  try {
+    const data = await dbPostgres.query.categoriasGastos.findMany({
+      orderBy: [asc(schema.categoriasGastos.nombre)],
+    });
+    return { success: true, data };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
+    console.error("Error al obtener categorías de gastos:", error);
+    return { success: false, error: message, data: [] };
+  }
+}
+
+// 9. Obtener Cuentas PUC (Plan Único de Cuentas)
+export async function getPucCuentas() {
+  try {
+    const data = await dbPostgres.query.pucCuentas.findMany({
+      orderBy: [asc(schema.pucCuentas.codigo)],
+    });
+    return { success: true, data };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
+    console.error("Error al obtener cuentas PUC:", error);
+    return { success: false, error: message, data: [] };
+  }
+}
+

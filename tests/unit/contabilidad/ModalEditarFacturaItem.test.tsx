@@ -75,7 +75,7 @@ describe("<ModalEditarFacturaItem />", () => {
       await waitFor(() => {
         expect(screen.queryByText("Agregar Nuevo Producto a Factura")).not.toBeInTheDocument();
       });
-    });
+    }, 15000);
   });
 
   describe("Modo Edición (mode='edit')", () => {

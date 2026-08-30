@@ -55,9 +55,9 @@ export default function HeroSection() {
 
             {/* Subtitle */}
             <p className="animate-fade-in-up animate-delay-200 text-[#F2F2F2]/90 text-base sm:text-lg leading-relaxed mb-10 max-w-xl">
-              Descubre nuestra selección premium de licores, snacks y
-              productos de necesidad con el servicio rápido y cercano que tu
-              barrio merece.
+              Visítanos en nuestra sede física en Ciudad Bachué y conoce nuestra
+              variedad en licores, snacks y productos de primera necesidad con
+              una atención cálida y personalizada.
             </p>
 
             {/* CTA Buttons */}
