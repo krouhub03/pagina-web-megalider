@@ -12,6 +12,7 @@ import {
   Users,
   ExternalLink,
   ChevronRight,
+  BookOpen,
 } from "lucide-react";
 
 interface NavItem {
@@ -51,6 +52,11 @@ const navSections: NavSection[] = [
         name: "Egresos y Gastos",
         href: "/contabilidad/gastos",
         icon: Wallet,
+      },
+      {
+        name: "Cuentas PUC",
+        href: "/contabilidad/puc",
+        icon: BookOpen,
       },
     ],
   },

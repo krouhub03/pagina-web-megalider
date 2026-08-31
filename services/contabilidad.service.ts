@@ -330,15 +330,41 @@ export async function getMetricasContables() {
       .select({
         total: sql<string>`COALESCE(SUM(${schema.egresosTienda.totalEgreso}), 0)`,
         conteo: sql<number>`COUNT(${schema.egresosTienda.id})`,
+        totalIva: sql<string>`COALESCE(SUM(${schema.egresosTienda.iva}), 0)`,
+        totalOtrosImp: sql<string>`COALESCE(SUM(${schema.egresosTienda.otrosImpuestos}), 0)`,
       })
       .from(schema.egresosTienda);
+
+    // Gastos Operativos (Clase 5 PUC o tipo GASTO_OPERATIVO) -> P&G
+    const totalGastosPyGRes = await dbPostgres
+      .select({
+        total: sql<string>`COALESCE(SUM(${schema.egresosTienda.totalEgreso}), 0)`,
+        conteo: sql<number>`COUNT(${schema.egresosTienda.id})`,
+      })
+      .from(schema.egresosTienda)
+      .where(
+        sql`${schema.egresosTienda.tipoEgreso} IN ('GASTO_OPERATIVO', 'GASTO', 'GASTO OPERATIVO') OR ${schema.egresosTienda.codigoPuc} LIKE '5%'`
+      );
+
+    // Inversiones (Activos Fijos) y Pago de Pasivos / Deudas
+    const totalInversionesRes = await dbPostgres
+      .select({
+        total: sql<string>`COALESCE(SUM(${schema.egresosTienda.totalEgreso}), 0)`,
+        conteo: sql<number>`COUNT(${schema.egresosTienda.id})`,
+      })
+      .from(schema.egresosTienda)
+      .where(
+        sql`${schema.egresosTienda.tipoEgreso} IN ('ACTIVO_FIJO', 'PAGO_DEUDA', 'ACTIVO', 'DEUDA') OR ${schema.egresosTienda.codigoPuc} LIKE '15%' OR ${schema.egresosTienda.codigoPuc} LIKE '2%'`
+      );
 
     const egresosHermesRes = await dbPostgres
       .select({
         conteo: sql<number>`COUNT(${schema.egresosTienda.id})`,
       })
       .from(schema.egresosTienda)
-      .where(eq(schema.egresosTienda.registradoPor, "Hermes Bot"));
+      .where(
+        sql`LOWER(${schema.egresosTienda.registradoPor}) LIKE '%hermes%' OR LOWER(${schema.egresosTienda.origen}) LIKE '%hermes%' OR LOWER(${schema.egresosTienda.registradoPor}) LIKE '%bot%'`
+      );
 
     return {
       success: true,
@@ -347,6 +373,12 @@ export async function getMetricasContables() {
         conteoFacturas: Number(totalFacturasRes[0]?.conteo || 0),
         totalEgresos: parseFloat(totalEgresosRes[0]?.total || "0"),
         conteoEgresos: Number(totalEgresosRes[0]?.conteo || 0),
+        totalGastosPyG: parseFloat(totalGastosPyGRes[0]?.total || "0"),
+        conteoGastosPyG: Number(totalGastosPyGRes[0]?.conteo || 0),
+        totalInversionesDeuda: parseFloat(totalInversionesRes[0]?.total || "0"),
+        conteoInversionesDeuda: Number(totalInversionesRes[0]?.conteo || 0),
+        totalIvaDescontable: parseFloat(totalEgresosRes[0]?.totalIva || "0"),
+        totalOtrosImpuestos: parseFloat(totalEgresosRes[0]?.totalOtrosImp || "0"),
         egresosPorHermes: Number(egresosHermesRes[0]?.conteo || 0),
       },
     };
@@ -360,6 +392,12 @@ export async function getMetricasContables() {
         conteoFacturas: 0,
         totalEgresos: 0,
         conteoEgresos: 0,
+        totalGastosPyG: 0,
+        conteoGastosPyG: 0,
+        totalInversionesDeuda: 0,
+        conteoInversionesDeuda: 0,
+        totalIvaDescontable: 0,
+        totalOtrosImpuestos: 0,
         egresosPorHermes: 0,
       },
       error: message,
@@ -376,6 +414,7 @@ export interface CrearEgresoInput {
   descripcion: string;
   proveedor?: string | null;
   nitEmisor?: string | null;
+  codigoCiiu?: string | null;
   subtotal?: string;
   iva?: string;
   otrosImpuestos?: string;
@@ -398,6 +437,7 @@ export async function crearEgreso(datos: CrearEgresoInput) {
         descripcion: datos.descripcion,
         proveedor: datos.proveedor || null,
         nitEmisor: datos.nitEmisor || null,
+        codigoCiiu: datos.codigoCiiu || null,
         subtotal: datos.subtotal || "0",
         iva: datos.iva || "0",
         otrosImpuestos: datos.otrosImpuestos || "0",

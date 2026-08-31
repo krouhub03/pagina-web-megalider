@@ -10,6 +10,7 @@ export default defineConfig({
   plugins: [tsconfigPaths(), react()],
   resolve: {
     alias: {
+      "@": path.resolve(__dirname, "./"),
       "server-only": path.resolve(__dirname, "./tests/mocks/empty.ts"),
       "client-only": path.resolve(__dirname, "./tests/mocks/empty.ts"),
     },

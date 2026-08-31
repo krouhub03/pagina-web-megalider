@@ -16,5 +16,5 @@ La siguiente tabla resume el estado actual de avance de cada característica y e
 | **Design System UI** | Frontend UI | ✅ Completado | Componentes `Button`, `Input`, `Card`, `Badge` estandarizados. |
 | **Skills de IA & Coding Standards** | Ecosistema / Agentes | ✅ Completado | 8 skills implementadas (`nextjs-coding`, `megalider-brand`, `token-optimization`, `nextjs-analytics`, `nextjs-lazy-loading`, `nextjs-bff`, `nextjs-unit-testing`, `nextjs-zustand`). |
 | **Auditoría Next.js 16+** | Calidad / Build | ✅ Completado | Compilación Turbopack exitosa (12/12 rutas) y cero errores TypeScript. |
-| **Modales de Corrección** | Contabilidad | ⏳ En Progreso | Interfaz para editar egresos y registrar motivo en auditoría. |
+| **Módulo de Contabilidad y Auditoría** | Contabilidad | ✅ Completado | Auditoría de cuadre tributario, consistencia aritmética, desgloses unitarios, filtros por fecha de registro responsivos y modales de edición de ítems. |
 | **Catálogo E-commerce** | Catálogo / Tienda | 📅 Planificado | CRUD de productos y sincronización de stock. |

@@ -38,3 +38,8 @@ Esta skill contiene la guía oficial de marca, paleta de colores y principios vi
 4. **Datos de Contacto y Ubicación**:
    - **Dirección**: Cl. 86 #95F-72, Ciudad Bachué I Etapa, Engativá, Bogotá, Colombia.
    - **Horario**: Lunes a Domingo de 11:00 AM a 11:00 PM.
+
+5. **Estándar de Redacción de Interfaz (UX Copywriting — Sin Jerga Técnica)**:
+   - **PROHIBICIÓN STRICTA:** NUNCA mostrar nombres de motores de bases de datos, librerías o jerga de desarrollo (`PostgreSQL`, `MySQL`, `Drizzle`, `ORM`, `BFF`, `API`, `JSON`, etc.) en elementos visuales de la interfaz de usuario (UI), páginas, modales, badges, tarjetas o mensajes del sistema.
+   - **LENGUAJE DE NEGOCIO:** Reemplazar por expresiones funcionales orientadas al usuario (ej. *"Sistema Contable"*, *"Catálogo Sincronizado en Vivo"*, *"Sistema de Inventario"*, *"Registro de Operaciones"*).
+

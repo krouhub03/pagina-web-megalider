@@ -127,11 +127,11 @@ export default async function DashboardPage() {
           </div>
           <div className="mt-3">
             <div className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              PostgreSQL
+              Sistema Contable
               <Badge variant="emerald">Online</Badge>
             </div>
             <div className="text-xs text-slate-500 mt-1">
-              Conexión Drizzle ORM sincronizada
+              Conexión a Base de Datos activa
             </div>
           </div>
         </Card>
@@ -151,7 +151,7 @@ export default async function DashboardPage() {
                   Agente Hermes IA — Estado y Trazabilidad
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Monitoreo de ingresos de facturas y gastos en PostgreSQL
+                  Monitoreo de ingresos de facturas y gastos contables
                 </p>
               </div>
             </div>

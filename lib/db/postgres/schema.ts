@@ -86,9 +86,10 @@ export const facturaItems = pgTable(
 // 4. Categorías de Gastos y Cuentas PUC (Exacto con la BD de Hermes)
 export const categoriasGastos = pgTable("categorias_gastos", {
   id: serial("id").primaryKey(),
-  nombre: varchar("nombre", { length: 100 }).notNull(),
-  comportamiento: varchar("comportamiento", { length: 100 }),
+  nombre: varchar("nombre", { length: 100 }).notNull().unique(),
+  comportamiento: varchar("comportamiento", { length: 20 }).notNull(),
   descripcion: text("descripcion"),
+  pucSugerido: varchar("puc_sugerido", { length: 10 }),
 });
 
 export const pucCuentas = pgTable("puc_cuentas", {

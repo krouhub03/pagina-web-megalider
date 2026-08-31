@@ -100,7 +100,7 @@ export default function CatalogoPage() {
             />
           </div>
           <Badge variant="mint" dot>
-            Sincronizado con MySQL (Tienda)
+            Catálogo Sincronizado en Vivo
           </Badge>
         </div>
 
@@ -110,7 +110,7 @@ export default function CatalogoPage() {
           </div>
           <h3 className="text-sm font-bold text-slate-700">Módulo de Catálogo Conectado</h3>
           <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-            Las 4 categorías institucionales de Cigarrería Megalider están configuradas. Cuando ingreses productos desde la BD de tienda o mediante importación de facturas, se sincronizarán directamente aquí.
+            Las 4 categorías institucionales de Cigarrería Megalider están configuradas. Cuando ingreses productos desde el sistema de inventario o mediante importación de facturas, se sincronizarán directamente aquí.
           </p>
         </div>
       </Card>
