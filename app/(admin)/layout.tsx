@@ -23,18 +23,25 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex text-slate-900 font-sans">
-      {/* Sidebar fijo */}
+    // Estructura principal flex: en móvil el sidebar desaparece y el hijo toma el 100%
+    <div className="min-h-screen bg-[#F8FAFC] flex text-slate-900 font-sans w-full">
+      {/* Sidebar fijo (Ya maneja su propio responsive con hidden md:flex) */}
       <AdminSidebar />
 
-      {/* Contenido principal */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* Contenedor del header y el contenido principal */}
+      <div className="flex-1 flex flex-col min-w-0 w-full">
         <AdminHeader />
-        <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto">
+        
+        {/* 
+          Ajustes responsivos:
+          - p-4: Menos padding en móviles para maximizar espacio
+          - sm:p-6 md:p-8: Más padding en tablets y desktop
+          - overflow-x-hidden: Previene scroll horizontal indeseado en móviles
+        */}
+        <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-7xl w-full mx-auto overflow-x-hidden">
           {children}
         </main>
       </div>
     </div>
   );
 }
-

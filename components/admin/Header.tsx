@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useTransition } from "react";
-import { Bell, ShieldCheck, LogOut } from "lucide-react";
+import { Bell, ShieldCheck, LogOut, Menu } from "lucide-react"; // Agrupé las importaciones de lucide-react
 import { logoutAction } from "@/services/auth.service";
 import { Button } from "@/components/ui/Button";
+import { useSidebarStore } from "@/lib/stores/use-sidebar-store";
 
 export default function AdminHeader() {
   const [isPending, startTransition] = useTransition();
+  const { toggleSidebar } = useSidebarStore();
 
   const handleLogout = () => {
     startTransition(async () => {
@@ -16,10 +18,22 @@ export default function AdminHeader() {
 
   return (
     <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
-      <div className="flex items-center gap-3"></div>
+      
+      {/* Lado Izquierdo: Botón de Menú Móvil (y/o Título de la vista) */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={toggleSidebar}
+          aria-label="Abrir menú"
+          className="p-2 -ml-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg md:hidden transition-colors"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+      </div>
 
-      {/* Controles de usuario */}
+      {/* Lado Derecho: Controles de usuario */}
       <div className="flex items-center gap-3 sm:gap-4">
+        
+        {/* Botón de Notificaciones */}
         <Button
           variant="ghost"
           size="icon"
@@ -30,9 +44,10 @@ export default function AdminHeader() {
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#038C3E] rounded-full"></span>
         </Button>
 
-        <div className="h-6 w-px bg-slate-200"></div>
+        {/* Separador Visual */}
+        <div className="h-6 w-px bg-slate-200 hidden sm:block"></div>
 
-        {/* Perfil */}
+        {/* Info del Perfil */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-[#067335] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
             AD
@@ -55,10 +70,12 @@ export default function AdminHeader() {
           onClick={handleLogout}
           isLoading={isPending}
           title="Cerrar sesión"
+          aria-label="Cerrar sesión"
           className="text-slate-400 hover:text-rose-600 hover:bg-rose-50"
         >
           <LogOut className="w-4 h-4" />
         </Button>
+
       </div>
     </header>
   );
