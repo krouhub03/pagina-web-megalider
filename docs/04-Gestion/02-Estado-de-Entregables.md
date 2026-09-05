@@ -17,4 +17,7 @@ La siguiente tabla resume el estado actual de avance de cada característica y e
 | **Skills de IA & Coding Standards** | Ecosistema / Agentes | ✅ Completado | 8 skills implementadas (`nextjs-coding`, `megalider-brand`, `token-optimization`, `nextjs-analytics`, `nextjs-lazy-loading`, `nextjs-bff`, `nextjs-unit-testing`, `nextjs-zustand`). |
 | **Auditoría Next.js 16+** | Calidad / Build | ✅ Completado | Compilación Turbopack exitosa (12/12 rutas) y cero errores TypeScript. |
 | **Módulo de Contabilidad y Auditoría** | Contabilidad | ✅ Completado | Auditoría de cuadre de factura, consistencia aritmética, desgloses unitarios, filtros por fecha de registro responsivos y modales de edición de ítems. |
+| **Historial Consolidado & Visor Multi-modal** | Contabilidad / Facturas | ✅ Completado | 4 acciones dedicadas: Ver (visor con zoom al cursor, pan y rotación), Conciliar (con filtro por medio de pago), Editar y Eliminar en cascada. |
+| **Motor de Conciliación & Tesorería NIIF** | Contabilidad / Backend | ✅ Completado | Partida doble estricta con sumas iguales, cálculo de retenciones y sincronización de `estadoPago` (`PAGADA` vs `PENDIENTE`). |
+| **Documento Soporte (Compras sin Factura)** | Contabilidad / Compras | ✅ Completado | Registro ágil de compras a no obligados con consecutivo oficial `DS-XXXX`, afectación de inventario y asiento directo a caja o CxP. |
 | **Catálogo E-commerce** | Catálogo / Tienda | 📅 Planificado | CRUD de productos y sincronización de stock. |

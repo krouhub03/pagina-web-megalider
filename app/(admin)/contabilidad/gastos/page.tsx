@@ -6,7 +6,7 @@ import {
   getCategoriasGastos,
   getPucCuentas,
 } from "@/services/contabilidad.service";
-import { Wallet, Bot, TrendingDown, Building2, Receipt, ArrowUpRight } from "lucide-react";
+import { Wallet, TrendingDown, Building2, Receipt } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { formatCurrency } from "@/lib/utils";
 import { GastosTablaInteractive, EgresoItem } from "./GastosTablaInteractive";
@@ -36,7 +36,7 @@ export default async function GastosPage() {
     egresosPorHermes: 0,
   };
   const categorias = categoriasRes.data || [];
-  const pucCuentas = pucRes.data || [];
+  const pucCuentas = (pucRes.data || []) as any[];
 
   return (
     <div className="space-y-6">
@@ -161,4 +161,3 @@ export default async function GastosPage() {
     </div>
   );
 }
-

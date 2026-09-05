@@ -42,6 +42,8 @@ export default function AuditFacturasPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          tipoOperacionId: auditMetadata.tipoOperacionId,
+          medioPagoId: auditMetadata.medioPagoId,
           observaciones: auditMetadata.observacionAuditoria
         })
       });

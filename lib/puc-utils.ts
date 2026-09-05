@@ -4,7 +4,7 @@ export interface PucCuentaItem {
   nivel: number | null;
   naturaleza: string | null;
   descripcion: string | null;
-  creadoEn: string | null;
+  creadoEn?: string | Date | null;
 }
 
 export interface FiltrosPuc {

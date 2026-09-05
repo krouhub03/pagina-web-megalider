@@ -93,7 +93,66 @@ export const proveedores = mysqlTable("proveedores", {
   creadoEn: timestamp("creado_en").defaultNow().notNull(),
 });
 
-// 6. Facturas
+// 6. PUC Cuentas (Plan Único de Cuentas)
+export const pucCuentas = mysqlTable("puc_cuentas", {
+  codigo: varchar("codigo", { length: 10 }).primaryKey(),
+  nombre: varchar("nombre", { length: 255 }),
+  nivel: int("nivel"),
+  naturaleza: varchar("naturaleza", { length: 50 }),
+  descripcion: text("descripcion"),
+  creadoEn: timestamp("creado_en").defaultNow(),
+});
+
+// 7. Tipos de Operación Contable (Inventario, Activos, Mantenimiento, etc.)
+export const tiposOperacion = mysqlTable("tipos_operacion", {
+  id: serial("id").primaryKey(),
+  codigo: varchar("codigo", { length: 50 }).notNull().unique(),
+  nombre: varchar("nombre", { length: 150 }).notNull(),
+  descripcion: text("descripcion"),
+  cuentaPucDebito: varchar("cuenta_puc_debito", { length: 10 }).notNull().references(() => pucCuentas.codigo),
+  cuentaPucCredito: varchar("cuenta_puc_credito", { length: 10 }).references(() => pucCuentas.codigo),
+  afectaInventario: boolean("afecta_inventario").default(false).notNull(),
+  esRemision: boolean("es_remision").default(false).notNull(),
+  activo: boolean("activo").default(true).notNull(),
+  creadoEn: timestamp("creado_en").defaultNow().notNull(),
+});
+
+// 8. Medios de Pago (Macro: Efectivo, Transferencia, Tarjeta, Crédito)
+export const mediosPago = mysqlTable("medios_pago", {
+  id: serial("id").primaryKey(),
+  codigo: varchar("codigo", { length: 50 }).unique(),
+  nombre: varchar("nombre", { length: 100 }).notNull().unique(),
+  activo: boolean("activo").default(true).notNull(),
+  creadoEn: timestamp("creado_en").defaultNow().notNull(),
+});
+
+// 9. Cuentas de Tesorería (Cajas y Bancos Específicos: Caja 1, Caja Menor, Bancolombia, Nequi)
+export const cuentasTesoreria = mysqlTable("cuentas_tesoreria", {
+  id: serial("id").primaryKey(),
+  medioPagoId: int("medio_pago_id").notNull().references(() => mediosPago.id),
+  codigoPuc: varchar("codigo_puc", { length: 10 }).notNull().references(() => pucCuentas.codigo),
+  nombreCuenta: varchar("nombre_cuenta", { length: 150 }).notNull(),
+  numeroReferencia: varchar("numero_referencia", { length: 100 }),
+  activo: boolean("activo").default(true).notNull(),
+  creadoEn: timestamp("creado_en").defaultNow().notNull(),
+}, (table) => [
+  index("idx_cuentas_tesoreria_medio_pago").on(table.medioPagoId),
+  index("idx_cuentas_tesoreria_codigo_puc").on(table.codigoPuc),
+]);
+
+// 10. Tipos de Retención en la Fuente (RteFte Compras, Servicios, ReteIVA, ReteICA)
+export const tiposRetencion = mysqlTable("tipos_retencion", {
+  id: serial("id").primaryKey(),
+  codigo: varchar("codigo", { length: 50 }).notNull().unique(),
+  nombre: varchar("nombre", { length: 150 }).notNull(),
+  porcentaje: decimal("porcentaje", { precision: 5, scale: 2 }).notNull(),
+  baseMinima: decimal("base_minima", { precision: 12, scale: 2 }).default("0.00"),
+  cuentaPuc: varchar("cuenta_puc", { length: 10 }).notNull().references(() => pucCuentas.codigo),
+  activo: boolean("activo").default(true).notNull(),
+  creadoEn: timestamp("creado_en").defaultNow().notNull(),
+});
+
+// 11. Facturas
 export const facturas = mysqlTable("facturas", {
   id: serial("id").primaryKey(),
   numeroFactura: varchar("numero_factura", { length: 100 }).notNull(),
@@ -107,6 +166,15 @@ export const facturas = mysqlTable("facturas", {
   clienteNombre: varchar("cliente_nombre", { length: 255 }),
   condicionPago: varchar("condicion_pago", { length: 100 }),
   medioPago: varchar("medio_pago", { length: 100 }),
+  
+  // Enlaces Contables y de Tesorería Progresiva
+  tipoOperacionId: int("tipo_operacion_id"),
+  medioPagoId: int("medio_pago_id"),
+  cuentaTesoreriaId: int("cuenta_tesoreria_id"),
+  remisionOrigenId: int("remision_origen_id"),
+  estadoRemision: mysqlEnum("estado_remision", ["PENDIENTE_FACTURAR", "FACTURADA", "NO_APLICA"]).default("NO_APLICA").notNull(),
+  estadoContable: mysqlEnum("estado_contable", ["PENDIENTE_CONCILIACION", "CONCILIADA", "PAGADA"]).default("PENDIENTE_CONCILIACION").notNull(),
+
   subtotal: decimal("subtotal", { precision: 12, scale: 2 }).default("0"),
   descuentoTotalFactura: decimal("descuento_total_factura", { precision: 12, scale: 2 }).default("0"),
   iva: decimal("iva", { precision: 12, scale: 2 }).default("0"),
@@ -122,9 +190,12 @@ export const facturas = mysqlTable("facturas", {
 }, (table) => [
   index("idx_facturas_proveedor").on(table.proveedorId),
   index("idx_facturas_fecha").on(table.fechaEmision),
+  index("idx_facturas_tipo_operacion").on(table.tipoOperacionId),
+  index("idx_facturas_medio_pago").on(table.medioPagoId),
+  index("idx_facturas_cuenta_tesoreria").on(table.cuentaTesoreriaId),
 ]);
 
-// 7. Factura Items
+// 12. Factura Items
 export const facturaItems = mysqlTable("factura_items", {
   id: serial("id").primaryKey(),
   facturaId: int("factura_id").notNull(),
@@ -145,7 +216,34 @@ export const facturaItems = mysqlTable("factura_items", {
   index("idx_factura_items_factura_id").on(table.facturaId),
 ]);
 
-// 8. Factura Archivos
+// 13. Factura Retenciones Aplicadas
+export const facturaRetenciones = mysqlTable("factura_retenciones", {
+  id: serial("id").primaryKey(),
+  facturaId: int("factura_id").notNull().references(() => facturas.id, { onDelete: "cascade" }),
+  tipoRetencionId: int("tipo_retencion_id").notNull().references(() => tiposRetencion.id),
+  baseGravable: decimal("base_gravable", { precision: 12, scale: 2 }).notNull(),
+  porcentajeAplicado: decimal("porcentaje_aplicado", { precision: 5, scale: 2 }).notNull(),
+  valorRetenido: decimal("valor_retenido", { precision: 12, scale: 2 }).notNull(),
+  creadoEn: timestamp("creado_en").defaultNow().notNull(),
+}, (table) => [
+  index("idx_factura_retenciones_factura_id").on(table.facturaId),
+]);
+
+// 14. Factura Asientos Contables (Libro Diario Oficial con Partida Doble)
+export const facturaAsientos = mysqlTable("factura_asientos", {
+  id: serial("id").primaryKey(),
+  facturaId: int("factura_id").notNull().references(() => facturas.id, { onDelete: "cascade" }),
+  cuentaPuc: varchar("cuenta_puc", { length: 10 }).notNull().references(() => pucCuentas.codigo),
+  concepto: varchar("concepto", { length: 255 }).notNull(),
+  debito: decimal("debito", { precision: 12, scale: 2 }).default("0.00").notNull(),
+  credito: decimal("credito", { precision: 12, scale: 2 }).default("0.00").notNull(),
+  creadoEn: timestamp("creado_en").defaultNow().notNull(),
+}, (table) => [
+  index("idx_factura_asientos_factura_id").on(table.facturaId),
+  index("idx_factura_asientos_cuenta_puc").on(table.cuentaPuc),
+]);
+
+// 15. Factura Archivos
 export const facturaArchivos = mysqlTable("factura_archivos", {
   id: serial("id").primaryKey(),
   facturaId: int("factura_id").notNull(),
@@ -157,26 +255,37 @@ export const facturaArchivos = mysqlTable("factura_archivos", {
   index("idx_factura_archivos_factura_id").on(table.facturaId),
 ]);
 
-// 9. PUC Cuentas
-export const pucCuentas = mysqlTable("puc_cuentas", {
-  codigo: varchar("codigo", { length: 10 }).primaryKey(),
-  nombre: varchar("nombre", { length: 255 }),
-  nivel: int("nivel"),
-  naturaleza: varchar("naturaleza", { length: 50 }),
-  descripcion: text("descripcion"),
-  creadoEn: timestamp("creado_en").defaultNow(),
-});
-
-// 10. Medios de Pago
-export const mediosPago = mysqlTable("medios_pago", {
-  id: serial("id").primaryKey(),
-  nombre: varchar("nombre", { length: 100 }).notNull().unique(),
-  activo: boolean("activo").default(true).notNull(),
-  creadoEn: timestamp("creado_en").defaultNow().notNull(),
-});
-
-// RELACIONES FACTURAS
+// RELACIONES RELACIONALES DRIZZLE
 export const proveedoresRelations = relations(proveedores, ({ many }) => ({
+  facturas: many(facturas),
+}));
+
+export const tiposOperacionRelations = relations(tiposOperacion, ({ one, many }) => ({
+  cuentaDebito: one(pucCuentas, {
+    fields: [tiposOperacion.cuentaPucDebito],
+    references: [pucCuentas.codigo],
+  }),
+  cuentaCredito: one(pucCuentas, {
+    fields: [tiposOperacion.cuentaPucCredito],
+    references: [pucCuentas.codigo],
+  }),
+  facturas: many(facturas),
+}));
+
+export const mediosPagoRelations = relations(mediosPago, ({ many }) => ({
+  cuentasTesoreria: many(cuentasTesoreria),
+  facturas: many(facturas),
+}));
+
+export const cuentasTesoreriaRelations = relations(cuentasTesoreria, ({ one, many }) => ({
+  medioPago: one(mediosPago, {
+    fields: [cuentasTesoreria.medioPagoId],
+    references: [mediosPago.id],
+  }),
+  cuentaPuc: one(pucCuentas, {
+    fields: [cuentasTesoreria.codigoPuc],
+    references: [pucCuentas.codigo],
+  }),
   facturas: many(facturas),
 }));
 
@@ -185,7 +294,25 @@ export const facturasRelations = relations(facturas, ({ one, many }) => ({
     fields: [facturas.proveedorId],
     references: [proveedores.id],
   }),
+  tipoOperacion: one(tiposOperacion, {
+    fields: [facturas.tipoOperacionId],
+    references: [tiposOperacion.id],
+  }),
+  medioPagoRel: one(mediosPago, {
+    fields: [facturas.medioPagoId],
+    references: [mediosPago.id],
+  }),
+  cuentaTesoreria: one(cuentasTesoreria, {
+    fields: [facturas.cuentaTesoreriaId],
+    references: [cuentasTesoreria.id],
+  }),
+  remisionOrigen: one(facturas, {
+    fields: [facturas.remisionOrigenId],
+    references: [facturas.id],
+  }),
   items: many(facturaItems),
+  retenciones: many(facturaRetenciones),
+  asientos: many(facturaAsientos),
   archivos: many(facturaArchivos),
 }));
 
@@ -193,6 +320,28 @@ export const facturaItemsRelations = relations(facturaItems, ({ one }) => ({
   factura: one(facturas, {
     fields: [facturaItems.facturaId],
     references: [facturas.id],
+  }),
+}));
+
+export const facturaRetencionesRelations = relations(facturaRetenciones, ({ one }) => ({
+  factura: one(facturas, {
+    fields: [facturaRetenciones.facturaId],
+    references: [facturas.id],
+  }),
+  tipoRetencion: one(tiposRetencion, {
+    fields: [facturaRetenciones.tipoRetencionId],
+    references: [tiposRetencion.id],
+  }),
+}));
+
+export const facturaAsientosRelations = relations(facturaAsientos, ({ one }) => ({
+  factura: one(facturas, {
+    fields: [facturaAsientos.facturaId],
+    references: [facturas.id],
+  }),
+  cuenta: one(pucCuentas, {
+    fields: [facturaAsientos.cuentaPuc],
+    references: [pucCuentas.codigo],
   }),
 }));
 

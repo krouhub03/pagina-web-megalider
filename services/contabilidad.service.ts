@@ -113,30 +113,60 @@ export async function crearFacturaCompleta(datos: CrearFacturaCompletaInput) {
   try {
     let proveedorId = datos.factura.proveedorId;
 
-    if (!proveedorId && datos.factura.nitProveedor && datos.factura.razonSocialProveedor) {
-      const provs = await dbMysql.select().from(schemaMysql.proveedores).where(eq(schemaMysql.proveedores.nit, datos.factura.nitProveedor));
-      if (provs.length > 0) {
-        proveedorId = provs[0].id;
+    if (!proveedorId) {
+      if (datos.factura.nitProveedor && datos.factura.razonSocialProveedor) {
+        const provs = await dbMysql.select().from(schemaMysql.proveedores).where(eq(schemaMysql.proveedores.nit, datos.factura.nitProveedor));
+        if (provs.length > 0) {
+          proveedorId = provs[0].id;
+        } else {
+          const result = await dbMysql.insert(schemaMysql.proveedores).values({
+            nit: datos.factura.nitProveedor,
+            razonSocial: datos.factura.razonSocialProveedor,
+          });
+          proveedorId = result[0].insertId;
+        }
       } else {
-        const result = await dbMysql.insert(schemaMysql.proveedores).values({
-          nit: datos.factura.nitProveedor,
-          razonSocial: datos.factura.razonSocialProveedor,
-        });
-        proveedorId = result[0].insertId;
+        const defaultProvs = await dbMysql.select().from(schemaMysql.proveedores).where(eq(schemaMysql.proveedores.nit, "222222222"));
+        if (defaultProvs.length > 0) {
+          proveedorId = defaultProvs[0].id;
+        } else {
+          const result = await dbMysql.insert(schemaMysql.proveedores).values({
+            nit: "222222222",
+            razonSocial: "PROVEEDOR GENERAL O CUANTÍAS MENORES",
+          });
+          proveedorId = result[0].insertId;
+        }
       }
     }
+
+    const finalProveedorId = proveedorId;
 
     return await dbMysql.transaction(async (tx) => {
 
       // Crear factura
-      const [insertRes] = await tx.insert(schemaMysql.facturas).values(); const nuevaFactura = { id: insertRes.insertId };
+      const [insertRes] = await tx.insert(schemaMysql.facturas).values({
+        proveedorId: finalProveedorId,
+        numeroFactura: datos.factura.numeroFactura || "FACT-SIN-NUMERO",
+        cufe: datos.factura.cufe,
+        documentoReferencia: datos.factura.documentoReferencia,
+        fechaEmision: datos.factura.fechaEmision || new Date().toISOString().split("T")[0],
+        fechaVencimiento: datos.factura.fechaVencimiento,
+        condicionPago: datos.factura.condicionPago,
+        medioPago: datos.factura.medioPago,
+        subtotal: datos.factura.subtotal || "0.00",
+        iva: datos.factura.iva || "0.00",
+        impoconsumo: datos.factura.impoconsumo || "0.00",
+        totalFactura: datos.factura.totalFactura || "0.00",
+        observaciones: datos.factura.observaciones,
+      });
+      const nuevaFactura = { id: insertRes.insertId };
 
       // Crear ítems
       if (datos.items && datos.items.length > 0) {
         await tx.insert(schemaMysql.facturaItems).values(
           datos.items.map(item => ({
             facturaId: nuevaFactura.id,
-            nombreProducto: item.nombreProducto || (item as any).descripcion || "",
+            nombreProducto: item.nombreProducto || item.descripcion || "",
             cantidadIngresada: item.cantidadIngresada,
             costoUnitarioCompra: item.costoUnitarioCompra,
             costoTotalLinea: item.costoTotalLinea,
@@ -169,7 +199,8 @@ export async function crearFacturaCompleta(datos: CrearFacturaCompletaInput) {
 export interface FacturaItemInput {
   codigoBarras?: string | null;
   codigoProveedor?: string | null;
-  descripcion: string;
+  nombreProducto?: string;
+  descripcion?: string;
   cantidadIngresada: string;
   unidadMedida?: string | null;
   costoUnitarioCompra: string;
@@ -265,7 +296,18 @@ export async function crearFacturaItem(facturaId: number, datos: FacturaItemInpu
   try {
     await dbMysql.insert(schemaMysql.facturaItems).values({
       facturaId,
-      ...datos,
+      nombreProducto: datos.nombreProducto || datos.descripcion || "Ítem General",
+      codigoBarras: datos.codigoBarras,
+      codigoProveedor: datos.codigoProveedor,
+      cantidadIngresada: datos.cantidadIngresada,
+      unidadMedida: datos.unidadMedida,
+      costoUnitarioCompra: datos.costoUnitarioCompra,
+      descuentoPorProducto: datos.descuentoPorProducto,
+      ivaTotal: datos.ivaTotal,
+      porcentajeIva: datos.porcentajeIva,
+      impuestoConsumo: datos.impuestoConsumo,
+      otrosImpuestos: datos.otrosImpuestos,
+      costoTotalLinea: datos.costoTotalLinea,
     });
 
     await recalcularTotalesFactura(facturaId);
@@ -307,6 +349,7 @@ export async function eliminarFacturaItem(itemId: number, facturaId?: number) {
 
 // 3. Obtener listado de Egresos / Gastos de la Tienda
 export async function getEgresos() { return { success: false, data: [], error: 'Migración en progreso' }; }
+export const getEgresosTienda = getEgresos;
 
 // 4. Registrar corrección o ajuste manual a un Egreso (Trazabilidad con historial_correcciones)
 export async function corregirEgreso(params: any) { return { success: false, error: 'Migración en progreso' }; }

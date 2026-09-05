@@ -20,11 +20,18 @@ export default function AuditModal({ factura, onClose, onApprove, onDiscard, onU
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [rescanFeedback, setRescanFeedback] = useState("");
   const [isRescanning, setIsRescanning] = useState(false);
-  const [auditMetadata, setAuditMetadata] = useState({
-    observacionAuditoria: ""
+  const [auditMetadata, setAuditMetadata] = useState<{
+    observacionAuditoria: string;
+    tipoOperacionId: number | null;
+    medioPagoId: number | null;
+  }>({
+    observacionAuditoria: "",
+    tipoOperacionId: null,
+    medioPagoId: null,
   });
   const [proveedoresDB, setProveedoresDB] = useState<any[]>([]);
   const [mediosPagoDB, setMediosPagoDB] = useState<any[]>([]);
+  const [tiposOperacionDB, setTiposOperacionDB] = useState<any[]>([]);
   const [showCreateProviderModal, setShowCreateProviderModal] = useState(false);
   const [newProviderData, setNewProviderData] = useState({ nit: "", razonSocial: "" });
   const [createProviderError, setCreateProviderError] = useState("");
@@ -71,9 +78,26 @@ export default function AuditModal({ factura, onClose, onApprove, onDiscard, onU
       .then(data => setProveedoresDB(Array.isArray(data) ? data : []))
       .catch(console.error);
       
-    fetch("/api/medios-pago")
+    fetch("/api/contabilidad/tesoreria?tipo=medios")
       .then(res => res.json())
-      .then(data => setMediosPagoDB(Array.isArray(data) ? data : []))
+      .then(data => {
+        const list = Array.isArray(data) ? data : (data?.data || []);
+        setMediosPagoDB(list);
+        if (list.length > 0) {
+          setAuditMetadata(prev => ({ ...prev, medioPagoId: prev.medioPagoId || list[0].id }));
+        }
+      })
+      .catch(console.error);
+
+    fetch("/api/contabilidad/tipos-operacion")
+      .then(res => res.json())
+      .then(json => {
+        const list = json?.data || (Array.isArray(json) ? json : []);
+        setTiposOperacionDB(list);
+        if (list.length > 0) {
+          setAuditMetadata(prev => ({ ...prev, tipoOperacionId: prev.tipoOperacionId || list[0].id }));
+        }
+      })
       .catch(console.error);
   }, []);
 
@@ -487,7 +511,7 @@ export default function AuditModal({ factura, onClose, onApprove, onDiscard, onU
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1.5">Fecha Vencimiento</label>
                   <input 
@@ -506,26 +530,6 @@ export default function AuditModal({ factura, onClose, onApprove, onDiscard, onU
                     onChange={(e) => handleUpdateField("fecha_vencimiento", e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                   />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">Medio de Pago</label>
-                  <select 
-                    value={data.condiciones_comerciales?.medio_pago || ""} 
-                    onChange={(e) => {
-                      setData((prev: any) => ({
-                        ...prev,
-                        condiciones_comerciales: { ...(prev.condiciones_comerciales || {}), medio_pago: e.target.value }
-                      }));
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  >
-                    <option value="">Selecciona...</option>
-                    {mediosPagoDB.map(mp => (
-                      <option key={mp.id} value={mp.nombre}>{mp.nombre}</option>
-                    ))}
-                    <option value="OTRO">Otro</option>
-                  </select>
                 </div>
 
                 <div>
@@ -993,6 +997,62 @@ export default function AuditModal({ factura, onClose, onApprove, onDiscard, onU
                     onChange={(e) => setData({ ...data, totales: { ...data.totales, total_factura: Number(e.target.value) }})}
                     className="w-32 text-right px-2 py-1 bg-emerald-50 border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-mono font-bold text-lg text-emerald-700"
                   />
+                </div>
+              </div>
+            </div>
+
+            {/* Clasificación Contable y Medio de Pago */}
+            <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-3">
+              <h3 className="font-semibold text-gray-800 text-sm pb-2 border-b border-gray-200">
+                🏷️ Clasificación de la Operación y Pago
+              </h3>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Tipo de Operación / Destino *
+                  </label>
+                  <select
+                    value={auditMetadata.tipoOperacionId || ""}
+                    onChange={(e) => setAuditMetadata({ ...auditMetadata, tipoOperacionId: Number(e.target.value) })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-blue-500 bg-white"
+                  >
+                    {tiposOperacionDB.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Medio de Pago Macro *
+                  </label>
+                  <select
+                    value={auditMetadata.medioPagoId || ""}
+                    onChange={(e) => {
+                      const idNum = Number(e.target.value);
+                      const found = mediosPagoDB.find((m) => m.id === idNum);
+                      setAuditMetadata({ ...auditMetadata, medioPagoId: idNum });
+                      if (found) {
+                        setData((prev: any) => ({
+                          ...prev,
+                          condiciones_comerciales: {
+                            ...(prev.condiciones_comerciales || {}),
+                            medio_pago: found.nombre,
+                          },
+                        }));
+                      }
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-blue-500 bg-white"
+                  >
+                    {mediosPagoDB.map((mp) => (
+                      <option key={mp.id} value={mp.id}>
+                        {mp.nombre}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>

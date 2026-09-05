@@ -65,6 +65,21 @@ const navSections: NavSection[] = [
         href: "/contabilidad/puc",
         icon: BookOpen,
       },
+      {
+        name: "Tipos de Operación",
+        href: "/contabilidad/tipos-operacion",
+        icon: Receipt,
+      },
+      {
+        name: "Cuentas de Tesorería",
+        href: "/contabilidad/tesoreria",
+        icon: Wallet,
+      },
+      {
+        name: "Retenciones RteFte",
+        href: "/contabilidad/retenciones",
+        icon: ClipboardCheck,
+      },
     ],
   },
   {
