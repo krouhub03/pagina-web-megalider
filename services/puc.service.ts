@@ -74,14 +74,21 @@ export async function crearPucCuenta(datos: {
   descripcion?: string;
 }) {
   try {
-    const existente = await getPucCuentaPorCodigo(datos.codigo);
+    const codLimpio = datos.codigo.trim();
+    const existente = await getPucCuentaPorCodigo(codLimpio);
     if (existente.data) {
-      return { success: false, error: `Ya existe una cuenta PUC con el código ${datos.codigo}` };
+      return { success: false, error: `Ya existe una cuenta PUC con el código ${codLimpio}` };
     }
 
-    await dbMysql
-      .insert(schemaMysql.pucCuentas); const nueva = await getPucCuentaPorCodigo(datos.codigo.trim()).then(r => r.data);
+    await dbMysql.insert(schemaMysql.pucCuentas).values({
+      codigo: codLimpio,
+      nombre: datos.nombre.trim(),
+      nivel: datos.nivel || calcularNivelPuc(codLimpio),
+      naturaleza: datos.naturaleza || "Débito",
+      descripcion: datos.descripcion?.trim() || null,
+    });
 
+    const nueva = await getPucCuentaPorCodigo(codLimpio).then((r) => r.data);
     return { success: true, data: nueva };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Error al crear la cuenta PUC";
@@ -100,6 +107,7 @@ export async function actualizarPucCuenta(
   }
 ) {
   try {
+    const codLimpio = codigo.trim();
     await dbMysql
       .update(schemaMysql.pucCuentas)
       .set({
@@ -108,11 +116,11 @@ export async function actualizarPucCuenta(
         ...(datos.naturaleza !== undefined && { naturaleza: datos.naturaleza }),
         ...(datos.descripcion !== undefined && { descripcion: datos.descripcion.trim() || null }),
       })
-      .where(eq(schemaMysql.pucCuentas.codigo, codigo));
-    const actualizada = await getPucCuentaPorCodigo(codigo).then(res => res.data);
+      .where(eq(schemaMysql.pucCuentas.codigo, codLimpio));
+    const actualizada = await getPucCuentaPorCodigo(codLimpio).then((res) => res.data);
 
     if (!actualizada) {
-      return { success: false, error: `No se encontró la cuenta PUC con código ${codigo}` };
+      return { success: false, error: `No se encontró la cuenta PUC con código ${codLimpio}` };
     }
 
     return { success: true, data: actualizada };
@@ -125,27 +133,33 @@ export async function actualizarPucCuenta(
 
 export async function eliminarPucCuenta(codigo: string) {
   try {
-    // Validar si la cuenta está en uso en egresos_tienda
-    const egresosAsociados = null; // dbMysql.query.egresosTienda.findFirst({ where: eq(schemaMysql.egresosTienda.codigoPuc, codigo) });
-
-    if (egresosAsociados) {
-      return {
-        success: false,
-        error: `No se puede eliminar la cuenta ${codigo} porque está asociada a egresos registrados.`,
-      };
-    }
-
-    const eliminada = await dbMysql.delete(schemaMysql.pucCuentas).where(eq(schemaMysql.pucCuentas.codigo, codigo));
+    const codLimpio = codigo.trim();
+    const eliminada = await dbMysql
+      .delete(schemaMysql.pucCuentas)
+      .where(eq(schemaMysql.pucCuentas.codigo, codLimpio));
 
     if (!eliminada) {
-      return { success: false, error: `No se encontró la cuenta PUC con código ${codigo}` };
+      return { success: false, error: `No se encontró la cuenta PUC con código ${codLimpio}` };
     }
 
     return { success: true, data: eliminada };
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Error al eliminar la cuenta PUC";
+    const rawMsg = error instanceof Error ? error.message : String(error);
     console.error(`Error en eliminarPucCuenta (${codigo}):`, error);
-    return { success: false, error: message };
+
+    // Detección amigable de error por llaves foráneas / integridad referencial
+    if (
+      rawMsg.includes("foreign key constraint") ||
+      rawMsg.includes("ER_ROW_IS_REFERENCED") ||
+      rawMsg.includes("a foreign key constraint fails")
+    ) {
+      return {
+        success: false,
+        error: `No se puede eliminar la cuenta ${codigo} porque está vinculada a tipos de operación, cuentas de tesorería o registros del sistema.`,
+      };
+    }
+
+    return { success: false, error: rawMsg || "Error al eliminar la cuenta PUC" };
   }
 }
 

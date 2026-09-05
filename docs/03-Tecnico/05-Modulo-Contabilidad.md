@@ -32,7 +32,7 @@ graph TD
 ## 🗄️ 2. Modelo de Datos y Tablas Contables (MySQL)
 
 ### 2.1 Tablas Maestras
-* **`puc_cuentas`**: Catálogo jerárquico de cuentas contables (Clases 1 a 6).
+* **`puc_cuentas`**: Catálogo jerárquico de cuentas contables (Clases 1 a 9 NIIF).
 * **`tipos_operacion`**: Define el destino económico del gasto o activo, la cuenta PUC débito/crédito, y si afecta stock o si es remisión.
   - `COMPRA_MERCANCIA`: Débito `143505`, Crédito `220505`, `afecta_inventario = true`.
   - `COMPRA_ACTIVO_FIJO`: Débito `152805`, Crédito `220505`, `afecta_inventario = false`.
@@ -47,7 +47,59 @@ graph TD
 
 ---
 
-## ⚙️ 3. Motor de Asientos Contables (`lib/contabilidad/motor-asientos.ts`)
+## 🗂️ 3. Catálogo del Plan Único de Cuentas (PUC) (`app/(admin)/contabilidad/puc`)
+
+El módulo del catálogo PUC gestiona la estructura contable base del sistema, permitiendo parametrizar las cuentas que sustentan las compras, inventarios, tesorería, retenciones y libro diario.
+
+```mermaid
+graph TD
+    UI[PucTablaInteractive.tsx] -->|Filtros Reactivos| Filtros[Búsqueda por Texto, Estado Financiero, Nivel y Naturaleza]
+    UI -->|Acción Crear / Editar| Modal[ModalCrearEditarPuc.tsx]
+    UI -->|Acción Eliminar| Delete[BotonEliminarPuc.tsx]
+    
+    Modal -->|Server Action| Actions[actions.ts: crearPucAction / actualizarPucAction]
+    Delete -->|Server Action| ActionsElim[actions.ts: eliminarPucAction]
+    
+    Actions --> Service[services/puc.service.ts]
+    ActionsElim --> Service
+    
+    Service -->|MySQL MariaDB Drizzle| DB[(puc_cuentas)]
+    Service -.->|Protección FK| Refs[tipos_operacion / cuentas_tesoreria / retenciones]
+```
+
+### 3.1 Estructura Jerárquica y Clasificación NIIF
+Implementada en [`lib/puc-utils.ts`](file:///c:/Users/BrianKrou/OneDrive/Documentos/PROYECTOS%20-%20JBone/Megalider/pagina-web-megalider/lib/puc-utils.ts):
+- **Cálculo Automático de Nivel (`calcularNivelPuc`):**
+  - **Nivel 1 (1 dígito):** Clase (ej. `1` Activo).
+  - **Nivel 2 (2 dígitos):** Grupo (ej. `11` Disponible).
+  - **Nivel 3 (4 dígitos):** Cuenta (ej. `1105` Caja).
+  - **Nivel 4 (6 dígitos):** Subcuenta (ej. `110505` Caja General).
+  - **Nivel 5 (>6 dígitos):** Auxiliar (ej. `11050501` Caja Sede Principal).
+- **Mapeo de Clases 1 a 9 (`CLASES_PUC_MAP`):**
+  - **Balance General:** Clase 1 (Activo - Débito), Clase 2 (Pasivo - Crédito), Clase 3 (Patrimonio - Crédito).
+  - **Estado de Resultados:** Clase 4 (Ingresos - Crédito), Clase 5 (Gastos - Débito), Clase 6 (Costos de Ventas - Débito), Clase 7 (Costos de Producción - Débito).
+  - **Cuentas de Orden:** Clase 8 (Deudoras - Débito), Clase 9 (Acreedoras - Crédito).
+- **Valores Canónicos de Naturaleza Contable:**
+  - Persistencia estandarizada en MySQL bajo las cadenas literales canónicas **`"Débito"`** y **`"Crédito"`**.
+  - Función de normalización tolerante (`normalizarNaturalezaPuc`) que acepta y convierte formatos legados (`"D"`, `"C"`, `"DEBITO"`, etc.) y auto-sugiere la naturaleza contable según el primer dígito del código PUC.
+
+### 3.2 Componentes y Servicios
+1. **`page.tsx` (Server Component):** Carga inicial de cuentas con `getPucCuentas()`, breadcrumb y cabecera corporativa.
+2. **`PucTablaInteractive.tsx` (Client Component):**
+   - Filtrado reactivo en memoria (búsqueda normalizada insensible a tildes y mayúsculas).
+   - Filtro por Tipo de Estado Financiero (`BALANCE_GENERAL`, `ESTADO_RESULTADOS`, `CUENTAS_DE_ORDEN`).
+   - Badges visuales semánticos de Clase, Nivel y Naturaleza Contable (Débito/Crédito).
+3. **`ModalCrearEditarPuc.tsx`:** Formulario interactivo con autocalculador dinámico de nivel al teclear el código numérico y selector de naturaleza contable explicativo.
+4. **`BotonEliminarPuc.tsx`:** Modal de confirmación de borrado con alerta de impacto.
+5. **`actions.ts` & `services/puc.service.ts`:**
+   - Validación Zod estricta (`/^[0-9]+$/` de 1 a 10 dígitos).
+   - Persistencia segura con Drizzle ORM (`dbMysql.insert(schemaMysql.pucCuentas).values(...)`).
+   - Captura de errores de clave foránea (`ER_ROW_IS_REFERENCED`) para proteger la integridad referencial si la cuenta está en uso en otros módulos.
+   - Revalidación automática con `revalidatePath("/contabilidad/puc")`.
+
+---
+
+## ⚙️ 4. Motor de Asientos Contables (`lib/contabilidad/motor-asientos.ts`)
 
 La función `generarAsientoCompra()` implementa el cálculo determinístico:
 
@@ -65,9 +117,7 @@ if (Math.abs(totalDebitos - totalCreditos) > 0.01) {
 
 ---
 
----
-
-## 🖥️ 4. Arquitectura de Interfaces y Modales del Historial (`app/(admin)/facturas/history/page.tsx`)
+## 🖥️ 5. Arquitectura de Interfaces y Modales del Historial (`app/(admin)/facturas/history/page.tsx`)
 
 El módulo del historial consolida las operaciones de auditoría mediante 4 acciones dedicadas e independientes por cada factura:
 
@@ -84,7 +134,7 @@ graph TD
     Eliminar -->|Transaccional| Cascade[Borrado en cascada de Asientos, Items, Archivos y Factura]
 ```
 
-### 4.1 Componentes de Gestión Contable
+### 5.1 Componentes de Gestión Contable
 
 1. **`HistoryModal.tsx` (Visor de Inspección de Solo Lectura)**:
    - Visor de imagen de factura con soporte multi-página (`factura_archivos` y `archivo_url` `LONGTEXT`).
@@ -111,15 +161,15 @@ graph TD
 
 ---
 
-## 🔄 5. Ciclo de Vida de Estados Contables y Compras a Crédito
+## 🔄 6. Ciclo de Vida de Estados Contables y Compras a Crédito
 
-### 5.1 Matriz de Estados
+### 6.1 Matriz de Estados
 | Estado Contable | Cuenta Crédito Principal | Condición de Tesorería | Estado de Pago |
 | :--- | :--- | :--- | :--- |
 | **`CONCILIADA`** | `110505` (Caja) o `111005` (Bancos) | Cuenta de tesorería asignada | `PAGADA` |
 | **`PENDIENTE_CONCILIACION`** | `220505` (Proveedores Nacionales) | Sin cuenta de tesorería ("Ninguna") | `PENDIENTE` (Crédito) |
 
-### 5.2 Flujo de Facturas a Crédito y Pago Posterior
+### 6.2 Flujo de Facturas a Crédito y Pago Posterior
 1. **Momento 1 (Causación)**: Al aprobar o registrar la factura a crédito, se deja la cuenta de tesorería en `— Ninguna —`. El sistema acredita la cuenta `220505` (Proveedores Nacionales), quedando en estado `PENDIENTE_CONCILIACION` y `PENDIENTE`.
 2. **Momento 2 (Cancelación/Pago Días Después)**: Desde el Historial (`/facturas/history`), se presiona el botón **Conciliar (`Scale`)**, se selecciona la Caja o Banco desembolsado y la fecha de pago. El sistema actualiza el asiento contable acreditando la cuenta de tesorería (`110505`/`111005`) y transiciona el estado a `CONCILIADA` y `PAGADA`.
 

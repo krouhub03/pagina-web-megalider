@@ -103,10 +103,12 @@ export default function PucTablaInteractive({ cuentasIniciales }: Props) {
     const infoClase = obtenerInfoClasePuc(codigo);
     if (!infoClase) return null;
 
-    const isBalance = infoClase.tipoEstado === "BALANCE_GENERAL";
-    const bgClass = isBalance
-      ? "bg-[#044a23]/10 text-[#044a23] border-[#044a23]/30"
-      : "bg-amber-100/80 text-amber-900 border-amber-300";
+    let bgClass = "bg-amber-100/80 text-amber-900 border-amber-300";
+    if (infoClase.tipoEstado === "BALANCE_GENERAL") {
+      bgClass = "bg-[#044a23]/10 text-[#044a23] border-[#044a23]/30";
+    } else if (infoClase.tipoEstado === "CUENTAS_DE_ORDEN") {
+      bgClass = "bg-purple-100 text-purple-900 border-purple-300";
+    }
 
     return (
       <span
@@ -202,6 +204,7 @@ export default function PucTablaInteractive({ cuentasIniciales }: Props) {
               <option value="todos">Todos los Estados Financieros</option>
               <option value="BALANCE_GENERAL">Balance General (Clases 1, 2, 3)</option>
               <option value="ESTADO_RESULTADOS">Estado de Resultados (Clases 4, 5, 6, 7)</option>
+              <option value="CUENTAS_DE_ORDEN">Cuentas de Orden (Clases 8, 9)</option>
             </select>
           </div>
 

@@ -3,7 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { X, Plus, Edit, BookOpen, Loader2, AlertCircle } from "lucide-react";
 import { crearPucAction, actualizarPucAction } from "./actions";
-import { type PucCuentaItem, calcularNivelPuc } from "@/lib/puc-utils";
+import {
+  type PucCuentaItem,
+  calcularNivelPuc,
+  normalizarNaturalezaPuc,
+  obtenerInfoClasePuc,
+} from "@/lib/puc-utils";
 
 interface Props {
   cuentaEditar?: PucCuentaItem | null;
@@ -25,10 +30,12 @@ export default function ModalCrearEditarPuc({ cuentaEditar, isOpen, onClose }: P
 
   useEffect(() => {
     if (cuentaEditar) {
-      setCodigo(cuentaEditar.codigo);
+      const cleanCode = cuentaEditar.codigo.trim();
+      setCodigo(cleanCode);
       setNombre(cuentaEditar.nombre || "");
-      setNivel(cuentaEditar.nivel || calcularNivelPuc(cuentaEditar.codigo));
-      setNaturaleza((cuentaEditar.naturaleza as "Débito" | "Crédito") || "Débito");
+      const nivelOficial = calcularNivelPuc(cleanCode);
+      setNivel(cuentaEditar.nivel || nivelOficial);
+      setNaturaleza(normalizarNaturalezaPuc(cuentaEditar.naturaleza, cleanCode));
       setDescripcion(cuentaEditar.descripcion || "");
     } else {
       setCodigo("");
@@ -40,11 +47,12 @@ export default function ModalCrearEditarPuc({ cuentaEditar, isOpen, onClose }: P
     setErrorMsg(null);
   }, [cuentaEditar, isOpen]);
 
-  // Recalcular nivel automáticamente al cambiar el código si no se edita manualmente
+  // Recalcular nivel y sugerir naturaleza automáticamente al escribir el código
   const handleCodigoChange = (val: string) => {
     setCodigo(val);
     if (!isEditing && val.trim().length > 0) {
       setNivel(calcularNivelPuc(val));
+      setNaturaleza(normalizarNaturalezaPuc(null, val));
     }
   };
 

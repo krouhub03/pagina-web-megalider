@@ -20,3 +20,6 @@ Este documento registra los acuerdos arquitectónicos y las decisiones estratég
 
 5. **Adopción de AI Coding Standards:**
    Se formalizaron las skills de agentes de codificación en `.agents/skills/` para garantizar que cualquier desarrollo futuro respete los contratos de marca, patrones BFF, lazy loading y optimización de contexto.
+
+6. **Estandarización de Naturaleza y Niveles Jerárquicos en Catálogo PUC (NIIF):**
+   Se definió el uso explícito de `"Débito"` y `"Crédito"` como valores canónicos en la base de datos MySQL (`puc_cuentas.naturaleza`), migrando y eliminando abreviaciones ambiguas (`"D"` / `"C"`). Asimismo, se formalizó el cálculo algorítmico determinístico del nivel jerárquico según la longitud del código (Clase: 1, Grupo: 2, Cuenta: 4, Subcuenta: 6, Auxiliar: >6 dígitos) tanto en base de datos como en los formularios interactivos.

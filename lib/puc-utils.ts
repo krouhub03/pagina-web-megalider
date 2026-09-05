@@ -14,7 +14,7 @@ export interface FiltrosPuc {
   tipoEstado?: "BALANCE_GENERAL" | "ESTADO_RESULTADOS";
 }
 
-export type TipoEstadoFinanciero = "BALANCE_GENERAL" | "ESTADO_RESULTADOS";
+export type TipoEstadoFinanciero = "BALANCE_GENERAL" | "ESTADO_RESULTADOS" | "CUENTAS_DE_ORDEN";
 
 export interface ClasePucInfo {
   clase: number;
@@ -74,6 +74,20 @@ export const CLASES_PUC_MAP: Record<number, ClasePucInfo> = {
     naturalezaDominante: "DEBITO",
     descripcion: "Erogaciones directas e indirectas durante el proceso de manufactura o prestación del servicio.",
   },
+  8: {
+    clase: 8,
+    nombre: "Cuentas de Orden Deudoras",
+    tipoEstado: "CUENTAS_DE_ORDEN",
+    naturalezaDominante: "DEBITO",
+    descripcion: "Registros de control sobre derechos contingentes, bienes recibidos en custodia o diferencias fiscales.",
+  },
+  9: {
+    clase: 9,
+    nombre: "Cuentas de Orden Acreedoras",
+    tipoEstado: "CUENTAS_DE_ORDEN",
+    naturalezaDominante: "CREDITO",
+    descripcion: "Registros de control sobre obligaciones contingentes o compromisos futuros.",
+  },
 };
 
 export function calcularNivelPuc(codigo: string): number {
@@ -94,5 +108,23 @@ export function obtenerInfoClasePuc(codigo: string): ClasePucInfo | null {
 export function obtenerTipoEstadoFinanciero(codigo: string): TipoEstadoFinanciero | "DESCONOCIDO" {
   const info = obtenerInfoClasePuc(codigo);
   return info ? info.tipoEstado : "DESCONOCIDO";
+}
+
+export function normalizarNaturalezaPuc(
+  nat: string | null | undefined,
+  codigo?: string
+): "Débito" | "Crédito" {
+  if (nat) {
+    const clean = nat.trim().toLowerCase();
+    if (clean.startsWith("d")) return "Débito";
+    if (clean.startsWith("c")) return "Crédito";
+  }
+  if (codigo) {
+    const info = obtenerInfoClasePuc(codigo);
+    if (info) {
+      return info.naturalezaDominante === "CREDITO" ? "Crédito" : "Débito";
+    }
+  }
+  return "Débito";
 }
 
