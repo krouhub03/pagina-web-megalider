@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next"; // 1. Importa Viewport
 import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import { WebVitals } from "@/components/analytics/web-vitals";
 import "./globals.css";
@@ -24,6 +24,14 @@ export const metadata: Metadata = {
     shortcut: "/favicon.png",
     apple: "/favicon.png",
   },
+};
+
+// 2. Exporta la configuración de viewport aquí
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({

@@ -392,7 +392,7 @@ export default function ModalDocumentoSoporte({
                   </label>
                   <select
                     id="ds-tipo-op"
-                    value={selectedTipoOpId || ""}
+                    value={selectedTipoOpId ?? ""}
                     onChange={(e) => setSelectedTipoOpId(Number(e.target.value))}
                     className="w-full text-xs bg-white border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#067335] focus:outline-hidden"
                   >
@@ -491,7 +491,7 @@ export default function ModalDocumentoSoporte({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {items.map((it, idx) => (
+                      {items.map((it) => (
                         <tr key={it.id} className="hover:bg-gray-50/50 transition-colors">
                           <td className="p-2">
                             <input
