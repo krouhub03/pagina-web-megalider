@@ -1,20 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbPostgres, schema } from "@/lib/db/postgres";
-import { eq, sql } from "drizzle-orm";
-
-let migrationChecked = false;
+import { eq } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   try {
-    if (!migrationChecked) {
-      try {
-        await dbPostgres.execute(sql`ALTER TABLE facturas_auditoria_archivos ADD COLUMN IF NOT EXISTS datos_base64_censurada TEXT;`);
-        migrationChecked = true;
-      } catch (migErr) {
-        console.warn("[Audit API] Advertencia en auto-migración de columna:", migErr);
-      }
-    }
-
     const facturas = await dbPostgres.query.facturasAuditoria.findMany({
       where: eq(schema.facturasAuditoria.estado, "PENDIENTE"),
       with: {

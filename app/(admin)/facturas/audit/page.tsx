@@ -35,8 +35,8 @@ export default function AuditFacturasPage() {
         <AuditModal 
           factura={selectedFactura} 
           onClose={closeAndClear}
-          onApprove={(id, correctedData, auditMetadata) => handleApprove(id, correctedData, auditMetadata, closeAndClear)}
-          onDiscard={(id) => handleDiscard(id, closeAndClear)}
+          onApprove={(id: any, correctedData: any, auditMetadata: any) => handleApprove(id, correctedData, auditMetadata, closeAndClear)}
+          onDiscard={(id: any) => handleDiscard(id, closeAndClear)}
           onUpdate={(newData: any) => {
             setFacturas(prev => prev.map(f => 
               f.id === selectedFactura.id 
