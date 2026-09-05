@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbPostgres, schema } from "@/lib/db/postgres";
-import { sql } from "drizzle-orm";
+import { dbMysql } from "@/lib/db/mysql";
+import { proveedores, mediosPago } from "@/lib/db/mysql/schema";
+import { sql, eq } from "drizzle-orm";
 
 export const maxDuration = 60; // Max execution time for vercel
 
@@ -94,8 +96,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "OPENROUTER_API_KEY no está configurada." }, { status: 500 });
     }
 
+    // Obtener listas desde la base de datos MySQL para guiar a la IA
+    const proveedoresList = await dbMysql.select({ nit: proveedores.nit, razonSocial: proveedores.razonSocial }).from(proveedores);
+    const mediosPagoList = await dbMysql.select({ nombre: mediosPago.nombre }).from(mediosPago).where(eq(mediosPago.activo, true));
+    
+    const provStr = proveedoresList.map(p => `- ${p.razonSocial} (NIT: ${p.nit})`).join("\\n");
+    const mediosStr = mediosPagoList.map(mp => `- ${mp.nombre}`).join("\\n");
+
     const systemPrompt = `      Eres un experto contable especializado en facturas colombianas de abarrotes, licores y minimercados.  
-       Extrae con total fidelidad los datos contables y comerciales visibles en la imagen sin inventar nada.                                        
+       Extrae con total fidelidad los datos contables y comerciales visibles en la imagen sin inventar nada.
+       
+       IMPORTANTE - BASES DE DATOS DEL SISTEMA:
+       Si detectas uno de los siguientes proveedores, trata de usar EXACTAMENTE la Razón Social y NIT como está aquí listado:
+       ${provStr}
+       
+       Para el Medio de Pago, intenta clasificarlo en uno de los siguientes si coincide:
+       ${mediosStr}
+       
+       Para el Tipo de Documento, usa EXCLUSIVAMENTE uno de estos valores:
+       - Factura Electrónica
+       - Factura POS
+       - Remisión
+       - Soporte de Entrega
+       - Nota Pedido
+       - Otro
+       
       ⚠️  REGLAS CRÍTICAS DE EXTRACCIÓN VISUAL (basadas en +50 facturas reales procesadas):                  
       1. LECTURA MULTILÍNEA (Tirillas térmicas): En muchos recibos térmicos, el nombre del producto está    
       en una línea y sus valores (cantidad, precio, IVA, ICO, total) aparecen en la línea inmediatamente    
@@ -172,7 +197,7 @@ export async function POST(req: NextRequest) {
             {
               "codigo_barras": "string o vacío",
               "codigo_proveedor": "string (SKU del proveedor)",
-              "descripcion": "string (nombre completo del producto)",
+              "nombre_producto": "string (nombre completo del producto)",
               "cantidad_ingresada": número,
               "unidad_medida": "UND o CAJ o SXP o FRP o BOL",
               "costo_unitario_compra": número (con decimales, precio base antes de impuestos, deducir si no está impreso),

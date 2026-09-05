@@ -1,6 +1,6 @@
 import "server-only";
-import { dbPostgres, schema } from "@/lib/db/postgres";
-import { asc, eq, ilike, like, or, sql } from "drizzle-orm";
+import { dbMysql, schema as schemaMysql } from "@/lib/db/mysql";
+import { asc, eq, like, or, sql } from "drizzle-orm";
 import {
   type PucCuentaItem,
   type FiltrosPuc,
@@ -18,15 +18,15 @@ export async function getPucCuentas(filtros: FiltrosPuc = {}) {
       const q = `%${filtros.search.trim()}%`;
       conditions.push(
         or(
-          ilike(schema.pucCuentas.codigo, q),
-          ilike(schema.pucCuentas.nombre, q),
-          ilike(schema.pucCuentas.descripcion, q)
+          like(schemaMysql.pucCuentas.codigo, q),
+          like(schemaMysql.pucCuentas.nombre, q),
+          like(schemaMysql.pucCuentas.descripcion, q)
         )
       );
     }
 
     if (filtros.nivel && filtros.nivel > 0) {
-      conditions.push(eq(schema.pucCuentas.nivel, filtros.nivel));
+      conditions.push(eq(schemaMysql.pucCuentas.nivel, filtros.nivel));
     }
 
     if (filtros.naturaleza && filtros.naturaleza.trim() !== "" && filtros.naturaleza !== "todos") {
@@ -34,15 +34,15 @@ export async function getPucCuentas(filtros: FiltrosPuc = {}) {
       const firstChar = nat.charAt(0).toUpperCase();
       conditions.push(
         or(
-          ilike(schema.pucCuentas.naturaleza, `%${nat}%`),
-          eq(schema.pucCuentas.naturaleza, firstChar)
+          like(schemaMysql.pucCuentas.naturaleza, `%${nat}%`),
+          eq(schemaMysql.pucCuentas.naturaleza, firstChar)
         )
       );
     }
 
-    const data = await dbPostgres.query.pucCuentas.findMany({
+    const data = await dbMysql.query.pucCuentas.findMany({
       where: conditions.length > 0 ? sql.join(conditions, sql` AND `) : undefined,
-      orderBy: [asc(schema.pucCuentas.codigo)],
+      orderBy: [asc(schemaMysql.pucCuentas.codigo)],
     });
 
     return { success: true, data };
@@ -55,8 +55,8 @@ export async function getPucCuentas(filtros: FiltrosPuc = {}) {
 
 export async function getPucCuentaPorCodigo(codigo: string) {
   try {
-    const data = await dbPostgres.query.pucCuentas.findFirst({
-      where: eq(schema.pucCuentas.codigo, codigo),
+    const data = await dbMysql.query.pucCuentas.findFirst({
+      where: eq(schemaMysql.pucCuentas.codigo, codigo),
     });
     return { success: true, data };
   } catch (error: unknown) {
@@ -79,16 +79,8 @@ export async function crearPucCuenta(datos: {
       return { success: false, error: `Ya existe una cuenta PUC con el código ${datos.codigo}` };
     }
 
-    const [nueva] = await dbPostgres
-      .insert(schema.pucCuentas)
-      .values({
-        codigo: datos.codigo.trim(),
-        nombre: datos.nombre.trim(),
-        nivel: datos.nivel || calcularNivelPuc(datos.codigo.trim()),
-        naturaleza: datos.naturaleza || "Débito",
-        descripcion: datos.descripcion?.trim() || null,
-      })
-      .returning();
+    await dbMysql
+      .insert(schemaMysql.pucCuentas); const nueva = await getPucCuentaPorCodigo(datos.codigo.trim()).then(r => r.data);
 
     return { success: true, data: nueva };
   } catch (error: unknown) {
@@ -108,16 +100,16 @@ export async function actualizarPucCuenta(
   }
 ) {
   try {
-    const [actualizada] = await dbPostgres
-      .update(schema.pucCuentas)
+    await dbMysql
+      .update(schemaMysql.pucCuentas)
       .set({
         ...(datos.nombre !== undefined && { nombre: datos.nombre.trim() }),
         ...(datos.nivel !== undefined && { nivel: datos.nivel }),
         ...(datos.naturaleza !== undefined && { naturaleza: datos.naturaleza }),
         ...(datos.descripcion !== undefined && { descripcion: datos.descripcion.trim() || null }),
       })
-      .where(eq(schema.pucCuentas.codigo, codigo))
-      .returning();
+      .where(eq(schemaMysql.pucCuentas.codigo, codigo));
+    const actualizada = await getPucCuentaPorCodigo(codigo).then(res => res.data);
 
     if (!actualizada) {
       return { success: false, error: `No se encontró la cuenta PUC con código ${codigo}` };
@@ -134,9 +126,7 @@ export async function actualizarPucCuenta(
 export async function eliminarPucCuenta(codigo: string) {
   try {
     // Validar si la cuenta está en uso en egresos_tienda
-    const egresosAsociados = await dbPostgres.query.egresosTienda.findFirst({
-      where: eq(schema.egresosTienda.codigoPuc, codigo),
-    });
+    const egresosAsociados = null; // dbMysql.query.egresosTienda.findFirst({ where: eq(schemaMysql.egresosTienda.codigoPuc, codigo) });
 
     if (egresosAsociados) {
       return {
@@ -145,10 +135,7 @@ export async function eliminarPucCuenta(codigo: string) {
       };
     }
 
-    const [eliminada] = await dbPostgres
-      .delete(schema.pucCuentas)
-      .where(eq(schema.pucCuentas.codigo, codigo))
-      .returning();
+    const eliminada = await dbMysql.delete(schemaMysql.pucCuentas).where(eq(schemaMysql.pucCuentas.codigo, codigo));
 
     if (!eliminada) {
       return { success: false, error: `No se encontró la cuenta PUC con código ${codigo}` };

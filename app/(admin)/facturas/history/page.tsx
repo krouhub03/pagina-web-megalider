@@ -134,7 +134,7 @@ export default function ConsolidadoFacturasPage() {
                     <div className="text-xs text-gray-500 flex items-center gap-2">
                       <span>NIT: {f.proveedor?.nit}</span>
                       <span className="text-gray-300">|</span>
-                      <span>Fac: {f.numeroFactura}</span>
+                      <span>{f.tipoDocumento}: {f.numeroFactura}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-center">

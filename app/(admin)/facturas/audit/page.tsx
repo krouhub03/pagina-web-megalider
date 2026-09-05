@@ -28,7 +28,7 @@ export default function AuditFacturasPage() {
     fetchFacturas();
   }, []);
 
-  const handleApprove = async (id: number, correctedData: any) => {
+  const handleApprove = async (id: number, correctedData: any, auditMetadata: any) => {
     try {
       // 1. Guardar cambios en postgres
       await fetch("/api/facturas/audit", {
@@ -42,8 +42,7 @@ export default function AuditFacturasPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          categoria: "INVENTARIO", // Podría ser un selector en el modal
-          estadoPago: "PENDIENTE"
+          observaciones: auditMetadata.observacionAuditoria
         })
       });
       

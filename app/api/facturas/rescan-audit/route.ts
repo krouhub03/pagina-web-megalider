@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { dbPostgres } from "@/lib/db/postgres";
 import { facturasAuditoria, facturasAuditoriaArchivos } from "@/lib/db/postgres/schema";
+import { dbMysql } from "@/lib/db/mysql";
+import { proveedores, mediosPago } from "@/lib/db/mysql/schema";
 import { eq } from "drizzle-orm";
 
 export async function POST(req: Request) {
@@ -22,8 +24,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Falta API KEY" }, { status: 500 });
     }
 
+    // Obtener listas desde la base de datos MySQL para guiar a la IA
+    const proveedoresList = await dbMysql.select({ nit: proveedores.nit, razonSocial: proveedores.razonSocial }).from(proveedores);
+    const mediosPagoList = await dbMysql.select({ nombre: mediosPago.nombre }).from(mediosPago).where(eq(mediosPago.activo, true));
+    
+    const provStr = proveedoresList.map(p => `- ${p.razonSocial} (NIT: ${p.nit})`).join("\\n");
+    const mediosStr = mediosPagoList.map(mp => `- ${mp.nombre}`).join("\\n");
+
     const systemPrompt = `      Eres un experto contable especializado en facturas colombianas de abarrotes, licores y minimercados.
       Esta es una solicitud de RE-ESCANEO. Tuviste errores en tu extracción anterior y el usuario te ha dado instrucciones precisas de qué corregir.
+      
+      IMPORTANTE - BASES DE DATOS DEL SISTEMA:
+      Si detectas uno de los siguientes proveedores, trata de usar EXACTAMENTE la Razón Social y NIT como está aquí listado:
+      ${provStr}
+      
+      Para el Medio de Pago, intenta clasificarlo en uno de los siguientes si coincide:
+      ${mediosStr}
+      
+      Para el Tipo de Documento, usa EXCLUSIVAMENTE uno de estos valores:
+      - Factura Electrónica
+      - Factura POS
+      - Remisión
+      - Soporte de Entrega
+      - Nota Pedido
+      - Otro
       
       JSON ANTERIOR CON ERRORES:
       ${JSON.stringify(currentData, null, 2)}

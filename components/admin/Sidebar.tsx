@@ -61,11 +61,6 @@ const navSections: NavSection[] = [
     title: "Contabilidad",
     items: [
       {
-        name: "Egresos y Gastos",
-        href: "/contabilidad/gastos",
-        icon: Wallet,
-      },
-      {
         name: "Cuentas PUC",
         href: "/contabilidad/puc",
         icon: BookOpen,

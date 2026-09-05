@@ -1,0 +1,1 @@
+ALTER TABLE `factura_items` CHANGE COLUMN `descripcion` `nombre_producto` text NOT NULL;

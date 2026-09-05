@@ -1,86 +1,168 @@
-﻿---
+---
 name: token-optimization
 description: Directivas y estrategias para optimizar el consumo de tokens, reducir costo computacional, comprimir contexto y aplicar control restrictivo de entrada/salida en integraciones de IA y prompts.
 ---
 
-# Optimización de Tokens y Eficiencia de Contexto
+# Skill: Desarrollo Web — Token Efficient
 
-Guía y directivas estrictas para maximizar la eficiencia, reducir costos computacionales y acelerar la latencia en interacciones e integraciones con modelos de lenguaje (LLMs / Agentes).
+## Objetivo
 
----
+Desarrollar y modificar proyectos web consumiendo la menor cantidad posible de tokens, manteniendo precisión, consistencia y seguridad.
 
-## 1. Reducción de Ruido en el Input
+## Reglas principales
 
-### Eliminación de Cortesía y Relleno
-- **Suprimir cortesías**: Eliminar saludos (*"Hola"*, *"Por favor"*), agradecimientos (*"Muchas gracias"*), despedidas y justificaciones emocionales.
-- **Enfoque puramente lógico**: Las APIs procesan instrucciones lógicas; cualquier texto empático o conversacional incrementa el recuento de tokens sin aportar valor semántico.
+### 1. No leer archivos innecesariamente
 
-### Formatos de Alta Densidad (YAML vs JSON/Prosa)
-- **Priorizar YAML**: Para inyectar datos, esquemas, configuraciones y variables, usar YAML en lugar de JSON o párrafos en lenguaje natural.
-- **Ahorro estructural**: YAML prescinde de llaves (`{}`), corchetes (`[]`), comillas excesivas y comas, reduciendo drásticamente los tokens por cada clave/valor.
+Antes de abrir un archivo:
 
-### Lenguaje Imperativo y Directo
-- **Verbos de acción al inicio**: Empezar instrucciones directamente con verbos operativos claros (*"Genera"*, *"Extrae"*, *"Formatea"*, *"Refactoriza"*, *"Valida"*).
-- **Evitar voz pasiva o rodeos**: Reemplazar construcciones como *"Me gustaría que por favor pudieras generar..."* por *"Genera..."*.
+* Determina si realmente es necesario.
+* No leas archivos completos si solo necesitas una función, componente o sección.
+* Usa búsquedas por nombre, función, variable, componente o texto exacto.
+* Prioriza fragmentos pequeños sobre archivos completos.
 
-### Poda y Minificación de Código
-- **Limpieza previa a la inyección**:
-  - Eliminar espacios en blanco y saltos de línea redundantes.
-  - Quitar comentarios no esenciales, `console.log`, `print` de depuración y código muerto.
-  - Enviar únicamente las firmas o las funciones pertinentes en lugar de archivos completos cuando solo se evalúa una porción.
+### 2. Trabajar por contexto
 
----
+Antes de modificar código:
 
-## 2. Control Restrictivo de Salida (Output)
+1. Identifica el archivo objetivo.
+2. Identifica exactamente qué parte debe cambiar.
+3. Lee únicamente el contexto necesario.
+4. Realiza el cambio.
+5. Verifica únicamente lo afectado.
 
-### Bloqueo de Preámbulos y Epílogos
-- **Instrucción Maestra (System Prompt)**:
-  > *"Devuelve únicamente la respuesta solicitada. Cero texto introductorio, disculpas, explicaciones no pedidas o conclusiones finales."*
-- **Evitar frases conversacionales**: Prohibir expresiones como *"¡Claro! Aquí tienes el código:"* o *"Espero que esto te sea de ayuda"*.
+No recorras todo el proyecto salvo que sea estrictamente necesario.
 
-### Estructuras Predefinidas
-- **Formatos concretos**: Exigir al modelo devolver la información en formatos estructurados específicos:
-  - Tablas Markdown compactas.
-  - Listas de viñetas directas.
-  - Bloques de código puros (raw code blocks).
-- **Evitar divagaciones**: Cuando el formato está estrictamente delimitado, el modelo no genera texto explicativo intentando justificar su respuesta.
+### 3. Evitar repetir información
 
-### Restricción de Longitud y Límites Numéricos
-- **Límites exactos en el prompt**:
-  - *"Resume en máximo 3 viñetas de 20 palabras cada una."*
-  - *"Genera una lista de máximo 5 ítems clave."*
-- **Ajuste de parámetros API**: Configurar `max_output_tokens` acorde a la respuesta esperada para prevenir desbordes costosos.
+No repitas:
 
----
+* Código que no cambió.
+* Archivos completos.
+* Dependencias ya conocidas.
+* Explicaciones obvias.
+* Contexto que ya está disponible.
 
-## 3. Gestión de Memoria del Agente y Contexto
+Cuando sea suficiente, responde:
 
-### Ventana de Contexto Deslizante (Sliding Window)
-- **Historial acotado**: Para flujos conversacionales, inyectar únicamente los últimos **3 a 5 intercambios relevantes** en lugar de todo el historial acumulado desde el inicio de la sesión.
+`Modificado: src/components/Header.tsx`
 
-### Resúmenes en Cascada (Hierarchical Summarization)
-- **Compresión periódica**: Cuando se requiera retener memoria de interacciones previas:
-  1. Ejecutar un paso previo con un modelo ligero/rápido para resumir la conversación anterior en un único párrafo comprimido o formato YAML clave.
-  2. Inyectar únicamente dicho resumen consolidado junto con el turno actual.
+en lugar de mostrar todo el archivo.
 
-### Extracción Quirúrgica (RAG Preciso)
-- **Inyección granular**: No enviar documentos completos ni capítulos enteros al prompt.
-- **Búsqueda vectorial / filtrado previo**: Usar embeddings, búsqueda híbrida o scripts de particionamiento (chunking) para inyectar exclusivamente los fragmentos exactos que contienen la respuesta requerida.
+### 4. Búsqueda antes que lectura
 
----
+Cuando necesites encontrar algo, busca primero.
 
-## 4. Plantilla Rápida de Prompt de Alta Eficiencia
+Ejemplos:
 
-```yaml
-# Directivas de Sistema
-rol: Optimizador de Datos
-modo: Estricto
-reglas_salida:
-  - Solo_contenido_solicitado: true
-  - Preambulo_y_epilogo: false
-  - Formato: YAML | Codigo_Puro | Tabla
+* Nombre de componente.
+* Nombre de función.
+* Variable.
+* Endpoint.
+* Clase CSS.
+* Texto visible.
+* Importación.
+* Error.
 
-# Tarea
-accion: Extrae entidades clave y clasifícalas
-limite: Max 5 items
-```
+Después abre solamente las líneas relevantes.
+
+### 5. Ediciones quirúrgicas
+
+Cuando el cambio sea pequeño:
+
+* Modifica solamente la sección afectada.
+* No reformatees archivos completos.
+* No cambies nombres innecesariamente.
+* No reorganices imports sin necesidad.
+* No hagas refactors no solicitados.
+
+### 6. Inspección progresiva
+
+Usa este orden:
+
+`buscar → leer fragmento → modificar → verificar`
+
+No:
+
+`leer proyecto completo → analizar todo → modificar`
+
+### 7. Errores
+
+Ante un error:
+
+1. Lee únicamente el mensaje de error.
+2. Localiza el archivo y línea afectados.
+3. Inspecciona el contexto inmediato.
+4. Corrige la causa.
+5. Verifica nuevamente.
+
+No analices todo el proyecto por un error localizado.
+
+### 8. Dependencias
+
+No abras `node_modules`.
+
+No analices dependencias completas.
+
+Consulta `package.json` únicamente cuando sea necesario para:
+
+* Instalar una dependencia.
+* Verificar una versión.
+* Comprobar un script.
+* Resolver incompatibilidades.
+
+### 9. Archivos grandes
+
+Para archivos grandes:
+
+* Nunca cargues el archivo completo por defecto.
+* Busca primero el componente o sección.
+* Trabaja en bloques pequeños.
+* Mantén el contexto mínimo necesario.
+
+### 10. Respuestas
+
+Las respuestas deben ser concisas.
+
+Formato recomendado:
+
+**Cambio**
+
+* `src/app/page.tsx` — actualizado Hero.
+
+**Resultado**
+
+* Hero responsive.
+* CTA corregido.
+* Sin cambios adicionales.
+
+Evita explicaciones extensas salvo que el usuario las solicite.
+
+### 11. No hacer cambios no solicitados
+
+No:
+
+* Cambiar arquitectura.
+* Cambiar librerías.
+* Actualizar dependencias.
+* Modificar estilos globales.
+* Renombrar archivos.
+* Refactorizar código.
+* Cambiar configuración.
+
+excepto cuando sea necesario para resolver el problema solicitado.
+
+### 12. Prioridad
+
+Cuando existan varias soluciones:
+
+1. Solución más pequeña.
+2. Menor cantidad de archivos modificados.
+3. Menor riesgo de regresiones.
+4. Menor consumo de contexto.
+5. Mantener la arquitectura existente.
+
+## Regla de oro
+
+**Usa el mínimo contexto necesario para realizar correctamente el trabajo.**
+
+No necesitas conocer todo el proyecto para modificar una pieza del proyecto.

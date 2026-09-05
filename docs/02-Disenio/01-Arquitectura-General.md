@@ -32,9 +32,9 @@ graph TD
     end
 
     subgraph Storage ["Almacenamiento y Agentes"]
-        DB_PG[("PostgreSQL (cmegalider)\nHermes IA & Contabilidad")]
-        DB_MySQL[("MySQL (u200862310_megalider)\nUsuarios & Catálogo")]
-        HermesAgent["Hermes IA Bot (Extractor Facturas)"]
+        DB_PG[("PostgreSQL (cmegalider)\nMotor IA & Auditoría (Temporal)")]
+        DB_MySQL[("MySQL (u200862310_megalider)\nUsuarios, E-commerce & Contabilidad")]
+        AIScanner["Capa IA Scanner API (Extracción Facturas)"]
     end
 
     Client --> MW
@@ -52,7 +52,7 @@ graph TD
     DAL --> MySQLClient
     PGClient --> DB_PG
     MySQLClient --> DB_MySQL
-    HermesAgent --> DB_PG
+    AIScanner --> DB_PG
 ```
 
 ---
@@ -60,7 +60,7 @@ graph TD
 ## 🗄️ Estrategia Multi-Base de Datos
 
 1. **PostgreSQL (`cmegalider`):**
-   - **Propósito:** Almacenar la contabilidad de la empresa, facturas de compras de mercancía (desglose de IVA, Impoconsumo, CUFE), egresos de caja registrados por el bot **Hermes IA** y la tabla de auditoría `historial_correcciones`.
+   - **Propósito:** Almacenar transitoriamente las extracciones JSON y archivos originales generados por el escáner web de IA en la tabla `facturas_auditoria`, sirviendo como bandeja de validación antes de migrar a contabilidad.
    - **ORM Driver:** `drizzle-orm/postgres-js` utilizando la biblioteca `postgres`.
 
 2. **MySQL (`u200862310_megalider`):**

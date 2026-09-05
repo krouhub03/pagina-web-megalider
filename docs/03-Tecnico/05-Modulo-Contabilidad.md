@@ -1,12 +1,12 @@
 # 📄 05 - Módulo de Contabilidad y Facturas de Compra
 
-Este documento detalla la arquitectura técnica, modelo de datos, desgloses unitarios, módulo de auditoría tributaria y filtros reactivos del módulo de facturas de compra para la gestión y control tributario de los datos capturados por Hermes IA.
+Este documento detalla la arquitectura técnica, modelo de datos, desgloses unitarios, módulo de auditoría tributaria y filtros reactivos del módulo de facturas de compra para la gestión y control tributario de los datos capturados mediante el escáner web de Inteligencia Artificial.
 
 ---
 
 ## 📄 Especificaciones Técnicas del Módulo
 
-* **Propósito:** Gestión, auditoría de cuadre tributario, corrección y control de facturas de compra procesadas por Hermes IA y cargadas al sistema.
+* **Propósito:** Gestión, auditoría de cuadre tributario, corrección y control de facturas de compra procesadas por la IA (desde `/facturas/scan`) y cargadas al sistema.
 * **Componentes y Rutas:**
   - `app/(admin)/facturas/page.tsx`: Server Component de entrada que consulta la base de datos (`getFacturas()`) y pasa las facturas iniciales a `FacturasTablaInteractive`.
   - `app/(admin)/facturas/FacturasTablaInteractive.tsx`: Client Component con consumo granular del store Zustand (`useFacturasFiltrosStore`). Incluye resumen KPI, filtro de búsqueda por N° factura/CUFE/NIT, selector rápido de fecha y tabla responsiva.
@@ -20,7 +20,7 @@ Este documento detalla la arquitectura técnica, modelo de datos, desgloses unit
 
 ## 🔍 Módulo de Auditoría de Cuadre de Factura
 
-El módulo de detalle de factura incluye una sección dedicada a la **Auditoría de Cuadre de Factura**, actuando como herramienta de control para identificar automáticamente inconsistencias o discrepancias entre la factura leída por el agente y el desglose de sus productos:
+El módulo de detalle de factura incluye una sección dedicada a la **Auditoría de Cuadre de Factura**, actuando como herramienta de control para identificar automáticamente inconsistencias o discrepancias entre la factura extraída por el escáner de IA y el desglose de sus productos:
 
 | Concepto Auditable | Definición y Verificación |
 | :--- | :--- |

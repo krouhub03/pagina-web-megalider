@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbMysql, schema } from "@/lib/db/mysql";
-import { desc, eq, like, and, or, sql } from "drizzle-orm";
+import { desc, eq, like, and, or, sql, inArray } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,15 +15,27 @@ export async function GET(req: NextRequest) {
     const conditions = [];
 
     if (search) {
-      conditions.push(
-        or(
-          like(schema.facturas.numeroFactura, `%${search}%`),
-          // Buscamos si el nit o razón social del proveedor coincide, pero requiere JOIN
-          // Usaremos una subquery o simplemente filtramos en memoria si es complejo, 
-          // pero Drizzle permite hacerlo con `with` y filtrado manual o usando joins.
-          // Para simplificar, asumimos que buscarán por número de factura o ajustamos
-        )
-      );
+      const matchedProviders = await dbMysql.select({ id: schema.proveedores.id })
+        .from(schema.proveedores)
+        .where(
+          or(
+            like(schema.proveedores.razonSocial, `%${search}%`),
+            like(schema.proveedores.nit, `%${search}%`)
+          )
+        );
+      
+      const providerIds = matchedProviders.map(p => p.id);
+
+      if (providerIds.length > 0) {
+        conditions.push(
+          or(
+            like(schema.facturas.numeroFactura, `%${search}%`),
+            inArray(schema.facturas.proveedorId, providerIds)
+          )
+        );
+      } else {
+        conditions.push(like(schema.facturas.numeroFactura, `%${search}%`));
+      }
     }
     
     if (categoria) {
@@ -37,30 +49,43 @@ export async function GET(req: NextRequest) {
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const [facturas, countResult] = await Promise.all([
-      dbMysql.query.facturas.findMany({
-        where: whereClause,
-        with: {
-          proveedor: true,
-          items: true,
-        },
-        orderBy: [desc(schema.facturas.fechaEmision)],
-        limit,
-        offset,
-      }),
-      dbMysql.select({ count: sql<number>`count(*)` }).from(schema.facturas).where(whereClause),
+    const [facturasRaw, countResult] = await Promise.all([
+      dbMysql.select().from(schema.facturas)
+        .where(whereClause)
+        .orderBy(desc(schema.facturas.fechaEmision))
+        .limit(limit)
+        .offset(offset),
+      dbMysql.select({ count: sql<number>`count(*)` }).from(schema.facturas).where(whereClause)
     ]);
 
-    const totalCount = countResult[0].count;
+    const total = Number(countResult[0]?.count) || 0;
+
+    // Fetch related data manually to avoid LATERAL join syntax error in MariaDB
+    const proveedorIds = [...new Set(facturasRaw.map(f => f.proveedorId))];
+    const facturaIds = facturasRaw.map(f => f.id);
+
+    const proveedores = proveedorIds.length > 0 
+      ? await dbMysql.select().from(schema.proveedores).where(inArray(schema.proveedores.id, proveedorIds))
+      : [];
+      
+    const items = facturaIds.length > 0
+      ? await dbMysql.select().from(schema.facturaItems).where(inArray(schema.facturaItems.facturaId, facturaIds))
+      : [];
+
+    const facturas = facturasRaw.map(f => ({
+      ...f,
+      proveedor: proveedores.find(p => p.id === f.proveedorId) || null,
+      items: items.filter(i => i.facturaId === f.id)
+    }));
 
     return NextResponse.json({
       success: true,
       data: facturas,
       meta: {
-        total: totalCount,
+        total,
         page,
         limit,
-        totalPages: Math.ceil(totalCount / limit)
+        totalPages: Math.ceil(total / limit)
       }
     });
   } catch (error) {
