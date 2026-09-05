@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import AuditModal from "@/components/facturas/auditModal/AuditModal";
+import AuditModal from "@/components/facturas/auditModal";
 import FacturasTable from "./FacturasTable"; // Importamos el componente visual
 import { useFacturas } from "./useFacturas";   // Importamos el custom hook
 
