@@ -8,19 +8,19 @@ Este documento detalla la arquitectura técnica, modelo de datos, desgloses unit
 
 * **Propósito:** Gestión, auditoría de cuadre tributario, corrección y control de facturas de compra procesadas por Hermes IA y cargadas al sistema.
 * **Componentes y Rutas:**
-  - `app/(admin)/contabilidad/facturas/page.tsx`: Server Component de entrada que consulta PostgreSQL (`getFacturas()`) y pasa las facturas iniciales a `FacturasTablaInteractive`.
-  - `app/(admin)/contabilidad/facturas/FacturasTablaInteractive.tsx`: Client Component con consumo granular del store Zustand (`useFacturasFiltrosStore`). Incluye resumen KPI, filtro de búsqueda por N° factura/CUFE/NIT, selector rápido de fecha de registro (`Todas`, `Hoy`, `Ayer`, `7 días`, `Este Mes`, `Rango`) y tabla responsiva con ordenamiento descendente priorizando compras recientes.
-  - `app/(admin)/contabilidad/facturas/[id]/page.tsx`: Server Component de detalle dinámico (`await params`) con tarjetas KPI de resumen, copiado de CUFE, tabla de productos con columnas unitarias desglosadas, resaltado de inconsistencias y el **Módulo de Auditoría de Cuadre Tributario**.
-  - `ModalEditarFactura.tsx`: Modal para corrección de datos identificativos de la factura.
-  - `ModalEditarFacturaItem.tsx`: Modal para crear, editar o eliminar líneas de producto recalculando los totales de cabecera en tiempo real.
-  - `BotonEliminarFactura.tsx`: Confirmación de borrado en cascada en PostgreSQL.
-  - `BotonCopiarCufe.tsx`: Copiado interactivo de código CUFE al portapapeles.
+  - `app/(admin)/facturas/page.tsx`: Server Component de entrada que consulta la base de datos (`getFacturas()`) y pasa las facturas iniciales a `FacturasTablaInteractive`.
+  - `app/(admin)/facturas/FacturasTablaInteractive.tsx`: Client Component con consumo granular del store Zustand (`useFacturasFiltrosStore`). Incluye resumen KPI, filtro de búsqueda por N° factura/CUFE/NIT, selector rápido de fecha y tabla responsiva.
+  - `app/(admin)/facturas/[id]/page.tsx`: Server Component de detalle dinámico (`await params`) con tarjetas KPI de resumen, copiado de CUFE, tabla de productos desglosadas y el **Módulo de Auditoría de Cuadre de Factura**.
+  - `components/facturas/ModalEditarFactura.tsx`: Modal para corrección de datos identificativos de la factura.
+  - `components/facturas/ModalEditarFacturaItem.tsx`: Modal para crear, editar o eliminar líneas de producto recalculando totales.
+  - `components/facturas/BotonEliminarFactura.tsx`: Confirmación de borrado en cascada.
+  - `components/facturas/BotonCopiarCufe.tsx`: Copiado interactivo de código CUFE al portapapeles.
 
 ---
 
-## 🔍 Módulo de Auditoría de Cuadre Tributario
+## 🔍 Módulo de Auditoría de Cuadre de Factura
 
-El módulo de detalle de factura incluye una sección dedicada a la **Auditoría de Cuadre Tributario**, la cual realiza una comprobación $1 a $1 entre los datos de la **Cabecera Oficial (`facturas`)** y la **Sumatoria de Productos (`factura_items`)**:
+El módulo de detalle de factura incluye una sección dedicada a la **Auditoría de Cuadre de Factura**, actuando como herramienta de control para identificar automáticamente inconsistencias o discrepancias entre la factura leída por el agente y el desglose de sus productos:
 
 | Concepto Auditable | Definición y Verificación |
 | :--- | :--- |

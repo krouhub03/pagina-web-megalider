@@ -25,12 +25,12 @@ La plataforma está diseñada para resolver tres necesidades clave del negocio:
         ┌────────────────────────────────┼────────────────────────────────┐
         ▼                                ▼                                ▼
   🟢 USUARIO EXTERNO               🔴 USUARIO INTERNO             ⚡ CAPA DE SERVICIOS BFF
-(Landing & E-commerce)          (Dashboard & Contabilidad)              (APIs & Auth)
+(Landing & E-commerce)          (Dashboard & Operaciones)               (APIs & Auth)
    app/(public)/                     app/(admin)/                       app/api/
    app/(auth)/                                                          middleware.ts
         │                                │                                │
         ▼                                ▼                                ▼
-MySQL (Catálogo/Clientes)        PostgreSQL (Hermes IA)            JWT / Edge RBAC / OAuth
+MySQL (Catálogo/Facturas)        PostgreSQL (Hermes IA Auditoría)  JWT / Edge RBAC / OAuth
 ```
 
 ---
