@@ -100,6 +100,7 @@ El proyecto cuenta con directivas estándar para agentes de codificación en `.a
 * [`nextjs-e2e-testing`](./.agents/skills/nextjs-e2e-testing/SKILL.md): Pruebas End-to-End con Playwright y control RBAC.
 * [`nextjs-system-testing`](./.agents/skills/nextjs-system-testing/SKILL.md): Pruebas de sistema, matriz CP-01 a CP-22 y Core Web Vitals.
 * [`nextjs-zustand`](./.agents/skills/nextjs-zustand/SKILL.md): Estado cliente inmutable con Zustand.
+* [`documentation-standard`](./.agents/skills/documentation-standard/SKILL.md): Estándar y directivas para el mantenimiento de la documentación del proyecto.
 
 ---
 © 2026 **Cigarrería Megalider** — Todos los derechos reservados.
