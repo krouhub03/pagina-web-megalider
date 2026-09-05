@@ -509,10 +509,10 @@ export default function AuditModal({ factura, onClose, onApprove, onDiscard, onU
                 <table className="w-full text-xs text-left">
                   <thead className="text-slate-500 border-b border-slate-200">
                     <tr>
-                      <th className="pb-2">Concepto</th>
-                      <th className="pb-2 text-right">Registrado (Totales)</th>
-                      <th className="pb-2 text-right">Sumatoria (Filas)</th>
-                      <th className="pb-2 text-center">Estado</th>
+                      <th className="pb-2 cursor-help" title="Nombre de la métrica auditada">Concepto</th>
+                      <th className="pb-2 text-right cursor-help" title="Valor general reportado en la factura">Registrado (Totales)</th>
+                      <th className="pb-2 text-right cursor-help" title="Suma matemática calculada por el sistema">Sumatoria (Filas)</th>
+                      <th className="pb-2 text-center cursor-help" title="Resultado de la comparación">Estado</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">

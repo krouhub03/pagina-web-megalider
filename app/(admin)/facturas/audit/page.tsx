@@ -99,11 +99,11 @@ export default function AuditFacturasPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-semibold">
-                <th className="px-6 py-4">Fecha de Escaneo</th>
-                <th className="px-6 py-4">N° Factura</th>
-                <th className="px-6 py-4">Proveedor (NIT)</th>
-                <th className="px-6 py-4 text-right">Total Leído</th>
-                <th className="px-6 py-4 text-center">Acciones</th>
+                <th className="px-6 py-4 cursor-help" title="Fecha en que Hermes IA subió el documento al sistema">Fecha de Escaneo</th>
+                <th className="px-6 py-4 cursor-help" title="Número consecutivo de la factura">N° Factura</th>
+                <th className="px-6 py-4 cursor-help" title="Razón social y NIT del emisor de la factura">Proveedor (NIT)</th>
+                <th className="px-6 py-4 text-right cursor-help" title="Costo neto de la factura detectado por el modelo de IA">Total Leído</th>
+                <th className="px-6 py-4 text-center cursor-help" title="Opciones de corrección, auditoría de sumatorias o borrado">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">

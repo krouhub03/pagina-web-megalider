@@ -242,7 +242,7 @@ export default function UsersManager({
               {stats.total}
             </div>
             <p className="text-[11px] text-slate-400 mt-0.5">
-              Cuentas en MySQL
+              Cuentas registradas
             </p>
           </div>
           <div className="p-3 bg-[#A7D9BD]/20 text-[#067335] rounded-2xl border border-[#53A677]/30">

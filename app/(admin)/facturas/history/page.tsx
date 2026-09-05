@@ -43,7 +43,7 @@ export default function ConsolidadoFacturasPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Historial Consolidado</h1>
-          <p className="text-gray-500">Facturas aprobadas e inmutables (Base de datos MySQL)</p>
+          <p className="text-gray-500">Facturas aprobadas e inmutables (Inventario Central)</p>
         </div>
         
         <button className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition flex items-center gap-2">
@@ -115,12 +115,12 @@ export default function ConsolidadoFacturasPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-semibold">
-                <th className="px-6 py-4">Fecha Emisión</th>
-                <th className="px-6 py-4">Proveedor / N° Factura</th>
-                <th className="px-6 py-4 text-center">Clasificación</th>
-                <th className="px-6 py-4 text-center">Estado Pago</th>
-                <th className="px-6 py-4 text-right">Total</th>
-                <th className="px-6 py-4 text-center">Acciones</th>
+                <th className="px-6 py-4 cursor-help" title="Fecha en que el proveedor emitió la factura">Fecha Emisión</th>
+                <th className="px-6 py-4 cursor-help" title="Razón social del proveedor y número consecutivo">Proveedor / N° Factura</th>
+                <th className="px-6 py-4 text-center cursor-help" title="Tipo de cuenta a afectar en el negocio">Clasificación</th>
+                <th className="px-6 py-4 text-center cursor-help" title="Estado de conciliación y pago">Estado Pago</th>
+                <th className="px-6 py-4 text-right cursor-help" title="Costo neto total incluyendo impuestos y descuentos">Total</th>
+                <th className="px-6 py-4 text-center cursor-help" title="Opciones para ver el detalle de la factura">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">

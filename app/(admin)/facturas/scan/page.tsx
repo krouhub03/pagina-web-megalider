@@ -812,15 +812,15 @@ export default function ScanFacturasPage() {
                 <table className="w-full text-left text-xs border-collapse min-w-[900px]">
                   <thead>
                     <tr className="bg-slate-200 text-slate-700 font-bold text-[11px] border-b border-slate-300">
-                      <th className="p-2 w-28">Ref / Cód</th>
-                      <th className="p-2">Descripción Producto</th>
-                      <th className="p-2 w-20 text-center">Cant.</th>
-                      <th className="p-2 w-24 text-right">Costo Unit.</th>
-                      <th className="p-2 w-20 text-right">Dcto.</th>
-                      <th className="p-2 w-24 text-right">IVA $</th>
-                      <th className="p-2 w-20 text-right">ICO $</th>
-                      <th className="p-2 w-24 text-right">Total Línea</th>
-                      <th className="p-2 w-10 text-center"></th>
+                      <th className="p-2 w-28 cursor-help" title="Código de referencia interno">Ref / Cód</th>
+                      <th className="p-2 cursor-help" title="Nombre o detalle del producto">Descripción Producto</th>
+                      <th className="p-2 w-20 text-center cursor-help" title="Cantidad de unidades">Cant.</th>
+                      <th className="p-2 w-24 text-right cursor-help" title="Precio base sin impuestos">Costo Unit.</th>
+                      <th className="p-2 w-20 text-right cursor-help" title="Descuento aplicado">Dcto.</th>
+                      <th className="p-2 w-24 text-right cursor-help" title="Valor del IVA">IVA $</th>
+                      <th className="p-2 w-20 text-right cursor-help" title="Valor del Impuesto al Consumo">ICO $</th>
+                      <th className="p-2 w-24 text-right cursor-help" title="Total neto de la fila">Total Línea</th>
+                      <th className="p-2 w-10 text-center cursor-help" title="Eliminar fila"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200 bg-white">

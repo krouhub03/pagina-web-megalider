@@ -65,10 +65,10 @@ export default function HistoryModal({ factura, onClose }: any) {
           <table className="w-full text-left border-collapse mb-6">
             <thead>
               <tr className="bg-gray-100 text-gray-600 text-xs uppercase font-medium">
-                <th className="p-3 rounded-tl-lg">Descripción</th>
-                <th className="p-3 text-right">Cant.</th>
-                <th className="p-3 text-right">Precio Unit.</th>
-                <th className="p-3 text-right rounded-tr-lg">Subtotal</th>
+                <th className="p-3 rounded-tl-lg cursor-help" title="Nombre o detalle del producto">Descripción</th>
+                <th className="p-3 text-right cursor-help" title="Cantidad de unidades">Cant.</th>
+                <th className="p-3 text-right cursor-help" title="Costo por unidad sin impuestos">Precio Unit.</th>
+                <th className="p-3 text-right rounded-tr-lg cursor-help" title="Total de la línea">Subtotal</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
