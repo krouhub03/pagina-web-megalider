@@ -48,10 +48,22 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     if (!tipoOp) {
-      // Fallback a COMPRA_INVENTARIO si no se especificó
+      // 1. Fallback a COMPRA_MERCANCIA (código estándar en BD)
+      tipoOp = await dbMysql.query.tiposOperacion.findFirst({
+        where: eq(mysqlSchema.tiposOperacion.codigo, "COMPRA_MERCANCIA"),
+      });
+    }
+
+    if (!tipoOp) {
+      // 2. Fallback a COMPRA_INVENTARIO
       tipoOp = await dbMysql.query.tiposOperacion.findFirst({
         where: eq(mysqlSchema.tiposOperacion.codigo, "COMPRA_INVENTARIO"),
       });
+    }
+
+    if (!tipoOp) {
+      // 3. Fallback al primer tipo de operación disponible en catálogo
+      tipoOp = await dbMysql.query.tiposOperacion.findFirst();
     }
 
     // 2. Transacción en MySQL
@@ -221,6 +233,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             concepto: linea.concepto,
             debito: linea.debito,
             credito: linea.credito,
+            estado: "ACTIVO",
           });
         }
       }

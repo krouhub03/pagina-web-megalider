@@ -108,4 +108,77 @@ describe("Motor Contable NIIF Colombia - Partida Doble", () => {
     expect(res.estaBalanceado).toBe(true);
     expect(res.asientos.some(a => a.cuentaPuc === "11050501" && Number(a.credito) === 119000)).toBe(true);
   });
+
+  it("debe manejar con precisión decimal operaciones de gran volumen monetario (DECIMAL 14,2)", () => {
+    const res = generarAsientoContable({
+      factura: {
+        id: 5,
+        numeroFactura: "FE-BIG-9999",
+        subtotal: "123456789.55",
+        iva: "23456790.01",
+        impoconsumo: "9876543.16",
+        otrosImpuestosTotal: "123456.78",
+        totalFactura: "156913579.50",
+        proveedorNombre: "IMPORTADORA GLOBAL DE LICORES",
+      },
+      tipoOperacion: {
+        codigo: "COMPRA_INVENTARIO",
+        nombre: "Compra Mayorista",
+        cuentaPucDebito: "143505",
+        cuentaPucCredito: "220505",
+        afectaInventario: true,
+      },
+      retenciones: [
+        {
+          cuentaPuc: "236540",
+          nombreRetencion: "Retención en la Fuente 2.5%",
+          valorRetenido: "3086419.74",
+        },
+        {
+          cuentaPuc: "236701",
+          nombreRetencion: "ReteIVA 15%",
+          valorRetenido: "3518518.50",
+        },
+      ],
+    });
+
+    expect(res.estaBalanceado).toBe(true);
+    expect(res.diferencia).toBeLessThan(0.05);
+    expect(res.totalDebitos).toBeCloseTo(156913579.50, 2);
+    expect(res.totalCreditos).toBeCloseTo(156913579.50, 2);
+  });
+
+  it("debe generar asiento contable para Documento Soporte a No Obligados a Facturar (DS-0001)", () => {
+    const res = generarAsientoContable({
+      factura: {
+        id: 6,
+        numeroFactura: "DS-0001",
+        subtotal: "450000.00",
+        iva: "0.00",
+        impoconsumo: "0.00",
+        otrosImpuestosTotal: "0.00",
+        totalFactura: "450000.00",
+        proveedorNombre: "PRODUCTOR ARTESANAL LOCAL",
+      },
+      tipoOperacion: {
+        codigo: "COMPRA_MERCANCIA",
+        nombre: "Compra de Mercancía / Inventario",
+        cuentaPucDebito: "143505",
+        cuentaPucCredito: "220505",
+        afectaInventario: true,
+      },
+      cuentaTesoreria: {
+        codigoPuc: "11050501",
+        nombreCuenta: "Caja Mostrador 1",
+      },
+    });
+
+    expect(res.estaBalanceado).toBe(true);
+    expect(res.diferencia).toBeLessThan(0.01);
+    expect(res.totalDebitos).toBe(450000);
+    expect(res.totalCreditos).toBe(450000);
+    // Débito a Inventario (143505) y Crédito a Caja Mostrador 1 (11050501)
+    expect(res.asientos.some((a) => a.cuentaPuc === "143505" && Number(a.debito) === 450000)).toBe(true);
+    expect(res.asientos.some((a) => a.cuentaPuc === "11050501" && Number(a.credito) === 450000)).toBe(true);
+  });
 });

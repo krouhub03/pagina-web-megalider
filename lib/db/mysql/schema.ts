@@ -235,12 +235,16 @@ export const facturaAsientos = mysqlTable("factura_asientos", {
   facturaId: int("factura_id").notNull().references(() => facturas.id, { onDelete: "cascade" }),
   cuentaPuc: varchar("cuenta_puc", { length: 10 }).notNull().references(() => pucCuentas.codigo),
   concepto: varchar("concepto", { length: 255 }).notNull(),
-  debito: decimal("debito", { precision: 12, scale: 2 }).default("0.00").notNull(),
-  credito: decimal("credito", { precision: 12, scale: 2 }).default("0.00").notNull(),
+  debito: decimal("debito", { precision: 14, scale: 2 }).default("0.00").notNull(),
+  credito: decimal("credito", { precision: 14, scale: 2 }).default("0.00").notNull(),
+  estado: varchar("estado", { length: 20 }).default("ACTIVO").notNull(),
+  anuladoEn: timestamp("anulado_en"),
+  motivoAnulacion: varchar("motivo_anulacion", { length: 255 }),
   creadoEn: timestamp("creado_en").defaultNow().notNull(),
 }, (table) => [
   index("idx_factura_asientos_factura_id").on(table.facturaId),
   index("idx_factura_asientos_cuenta_puc").on(table.cuentaPuc),
+  index("idx_factura_asientos_estado").on(table.estado),
 ]);
 
 // 15. Factura Archivos

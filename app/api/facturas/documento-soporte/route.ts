@@ -149,7 +149,19 @@ export async function POST(request: Request) {
 
     if (!tipoOp) {
       tipoOp = await dbMysql.query.tiposOperacion.findFirst({
+        where: eq(mysqlSchema.tiposOperacion.codigo, "COMPRA_MERCANCIA"),
+      });
+    }
+
+    if (!tipoOp) {
+      tipoOp = await dbMysql.query.tiposOperacion.findFirst({
         where: eq(mysqlSchema.tiposOperacion.codigo, "COMPRA_INVENTARIO"),
+      });
+    }
+
+    if (!tipoOp) {
+      tipoOp = await dbMysql.query.tiposOperacion.findFirst({
+        where: eq(mysqlSchema.tiposOperacion.activo, true),
       });
     }
 
@@ -263,6 +275,7 @@ export async function POST(request: Request) {
             concepto: linea.concepto,
             debito: linea.debito,
             credito: linea.credito,
+            estado: "ACTIVO",
           });
         }
       }

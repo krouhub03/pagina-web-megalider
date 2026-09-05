@@ -110,12 +110,13 @@ export default function ModalDocumentoSoporte({
       fetch("/api/facturas/documento-soporte").then((r) => r.json()),
     ])
       .then(([opsRes, mediosRes, cuentasRes, dsRes]) => {
-        if (opsRes?.data) {
+        if (opsRes?.data && Array.isArray(opsRes.data) && opsRes.data.length > 0) {
           setTiposOperacion(opsRes.data);
-          // Set default to COMPRA_INVENTARIO
-          const invOp = opsRes.data.find(
-            (o: TipoOperacion) => o.codigo === "COMPRA_INVENTARIO"
-          );
+          // Set default to COMPRA_MERCANCIA or first active operation
+          const invOp =
+            opsRes.data.find((o: TipoOperacion) => o.codigo === "COMPRA_MERCANCIA") ||
+            opsRes.data.find((o: TipoOperacion) => o.codigo === "COMPRA_INVENTARIO") ||
+            opsRes.data[0];
           if (invOp) setSelectedTipoOpId(invOp.id);
         }
         if (mediosRes?.data && Array.isArray(mediosRes.data)) {

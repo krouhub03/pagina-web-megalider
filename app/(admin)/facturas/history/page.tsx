@@ -86,6 +86,40 @@ export default function ConsolidadoFacturasPage() {
   const [facturaAEditar, setFacturaAEditar] = useState<FacturaHistorial | null>(null);
   const [facturaAEliminar, setFacturaAEliminar] = useState<FacturaHistorial | null>(null);
   const [isModalDocSoporteOpen, setIsModalDocSoporteOpen] = useState(false);
+  const [isSyncingAsientos, setIsSyncingAsientos] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sincronizar asientos contables faltantes en el Libro Diario
+  const handleSyncLibroDiario = async () => {
+    setIsSyncingAsientos(true);
+    setSyncMessage(null);
+    try {
+      const res = await fetch("/api/contabilidad/asientos/sync", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSyncMessage({
+          type: "success",
+          text: data.message || `Sincronización exitosa: ${data.data?.asientosGenerados ?? 0} asientos contables generados.`,
+        });
+        fetchFacturas();
+      } else {
+        setSyncMessage({
+          type: "error",
+          text: data.error?.message || "Error al sincronizar asientos con el Libro Diario.",
+        });
+      }
+    } catch (err: any) {
+      setSyncMessage({
+        type: "error",
+        text: "Error de red al sincronizar con el Libro Diario.",
+      });
+    } finally {
+      setIsSyncingAsientos(false);
+      setTimeout(() => setSyncMessage(null), 6000);
+    }
+  };
 
   // Filtros reactivos adaptados
   const [search, setSearch] = useState("");
@@ -267,7 +301,21 @@ export default function ConsolidadoFacturasPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            onClick={handleSyncLibroDiario}
+            disabled={isSyncingAsientos}
+            className="bg-emerald-50 text-[#067335] border border-[#067335]/30 hover:bg-[#067335] hover:text-white px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all shadow-xs flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Generar asientos contables en el Libro Diario para facturas históricas que no tengan registro"
+          >
+            {isSyncingAsientos ? (
+              <Loader2 className="w-4 h-4 animate-spin text-current" />
+            ) : (
+              <RotateCcw className="w-4 h-4 text-current" />
+            )}
+            <span>{isSyncingAsientos ? "Sincronizando..." : "Sincronizar Libro Diario"}</span>
+          </button>
+
           <button
             onClick={() => setIsModalDocSoporteOpen(true)}
             className="bg-[#038C3E] text-white px-4 py-2.5 rounded-lg text-xs font-semibold hover:bg-[#067335] transition-all shadow-md shadow-[#038C3E]/20 flex items-center gap-2 cursor-pointer"
@@ -287,6 +335,32 @@ export default function ConsolidadoFacturasPage() {
           </button>
         </div>
       </div>
+
+      {/* Alerta / Feedback de Sincronización Contable */}
+      {syncMessage && (
+        <div
+          className={`p-3.5 rounded-xl border text-xs font-medium flex items-center justify-between transition-all animate-in fade-in slide-in-from-top-2 ${
+            syncMessage.type === "success"
+              ? "bg-emerald-50 text-emerald-900 border-emerald-200"
+              : "bg-red-50 text-red-900 border-red-200"
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            {syncMessage.type === "success" ? (
+              <CheckCircle2 className="w-4 h-4 text-[#038C3E] shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+            )}
+            <span>{syncMessage.text}</span>
+          </div>
+          <button
+            onClick={() => setSyncMessage(null)}
+            className="text-gray-400 hover:text-gray-700 text-xs px-2 py-1 rounded transition"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* KPI Resumen Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

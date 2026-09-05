@@ -15,7 +15,9 @@ import {
   BookOpen,
   ScanLine,
   ClipboardCheck,
-  PackageSearch
+  PackageSearch,
+  Scale,
+  Layers,
 } from "lucide-react";
 
 interface NavItem {
@@ -61,9 +63,19 @@ const navSections: NavSection[] = [
     title: "Contabilidad",
     items: [
       {
+        name: "Libro Diario",
+        href: "/contabilidad/libro-diario",
+        icon: BookOpen,
+      },
+      {
+        name: "Balance Comprobación",
+        href: "/contabilidad/balance",
+        icon: Scale,
+      },
+      {
         name: "Cuentas PUC",
         href: "/contabilidad/puc",
-        icon: BookOpen,
+        icon: Layers,
       },
       {
         name: "Tipos de Operación",

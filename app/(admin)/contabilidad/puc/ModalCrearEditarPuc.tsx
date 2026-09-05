@@ -1,13 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Plus, Edit, BookOpen, Loader2, AlertCircle } from "lucide-react";
+import { X, Plus, Edit, BookOpen, Loader2, AlertCircle, Info } from "lucide-react";
 import { crearPucAction, actualizarPucAction } from "./actions";
 import {
   type PucCuentaItem,
-  calcularNivelPuc,
   normalizarNaturalezaPuc,
-  obtenerInfoClasePuc,
 } from "@/lib/puc-utils";
 
 interface Props {
@@ -28,13 +26,53 @@ export default function ModalCrearEditarPuc({ cuentaEditar, isOpen, onClose }: P
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Función estricta para determinar el nivel basado en la longitud
+  const calcularNivelPorDigitos = (cod: string): number => {
+    const len = cod.replace(/\D/g, "").length;
+    if (len <= 1) return 1;      // 1 dígito -> Clase
+    if (len === 2) return 2;     // 2 dígitos -> Grupo
+    if (len <= 4) return 3;      // 3-4 dígitos -> Cuenta
+    if (len <= 6) return 4;      // 5-6 dígitos -> Subcuenta
+    return 5;                    // >6 dígitos -> Auxiliar
+  };
+
+  // Función para obtener el nombre del nivel
+  const getNombreNivel = (nivelNum: number) => {
+    switch (nivelNum) {
+      case 1: return "Clase (1 dígito)";
+      case 2: return "Grupo (2 dígitos)";
+      case 3: return "Cuenta (3-4 dígitos)";
+      case 4: return "Subcuenta (5-6 dígitos)";
+      case 5: return "Auxiliar (>6 dígitos)";
+      default: return "Desconocido";
+    }
+  };
+
+  // Función para determinar la clase de cuenta según el primer dígito del PUC
+  const getClasePuc = (cod: string) => {
+    if (!cod) return "Esperando código...";
+    const primerDigito = cod.charAt(0);
+    switch (primerDigito) {
+      case "1": return "Activo";
+      case "2": return "Pasivo";
+      case "3": return "Patrimonio";
+      case "4": return "Ingresos";
+      case "5": return "Gastos";
+      case "6": return "Costos de Ventas";
+      case "7": return "Costos de Producción";
+      case "8": return "Cuentas de Orden Deudoras";
+      case "9": return "Cuentas de Orden Acreedoras";
+      default: return "Clase no válida";
+    }
+  };
+
   useEffect(() => {
     if (cuentaEditar) {
       const cleanCode = cuentaEditar.codigo.trim();
       setCodigo(cleanCode);
       setNombre(cuentaEditar.nombre || "");
-      const nivelOficial = calcularNivelPuc(cleanCode);
-      setNivel(cuentaEditar.nivel || nivelOficial);
+      // FORZAMOS el recálculo aquí para ignorar cualquier dato erróneo previo
+      setNivel(calcularNivelPorDigitos(cleanCode));
       setNaturaleza(normalizarNaturalezaPuc(cuentaEditar.naturaleza, cleanCode));
       setDescripcion(cuentaEditar.descripcion || "");
     } else {
@@ -47,12 +85,18 @@ export default function ModalCrearEditarPuc({ cuentaEditar, isOpen, onClose }: P
     setErrorMsg(null);
   }, [cuentaEditar, isOpen]);
 
-  // Recalcular nivel y sugerir naturaleza automáticamente al escribir el código
+  // Actualización en tiempo real al escribir
   const handleCodigoChange = (val: string) => {
-    setCodigo(val);
-    if (!isEditing && val.trim().length > 0) {
-      setNivel(calcularNivelPuc(val));
-      setNaturaleza(normalizarNaturalezaPuc(null, val));
+    const soloNumeros = val.replace(/\D/g, "");
+    setCodigo(soloNumeros);
+    
+    if (soloNumeros.length > 0) {
+      setNivel(calcularNivelPorDigitos(soloNumeros));
+      if (!isEditing) {
+        setNaturaleza(normalizarNaturalezaPuc(null, soloNumeros));
+      }
+    } else {
+      setNivel(1);
     }
   };
 
@@ -64,37 +108,18 @@ export default function ModalCrearEditarPuc({ cuentaEditar, isOpen, onClose }: P
     setErrorMsg(null);
 
     try {
-      if (isEditing) {
-        const res = await actualizarPucAction(cuentaEditar.codigo, {
-          nombre,
-          nivel,
-          naturaleza,
-          descripcion,
-        });
+      const payload = { nombre, nivel, naturaleza, descripcion };
+      const res = isEditing
+        ? await actualizarPucAction(cuentaEditar.codigo, payload)
+        : await crearPucAction({ codigo, ...payload });
 
-        if (res.success) {
-          onClose();
-        } else {
-          setErrorMsg(res.error || "Error al actualizar la cuenta PUC");
-        }
+      if (res.success) {
+        onClose();
       } else {
-        const res = await crearPucAction({
-          codigo,
-          nombre,
-          nivel,
-          naturaleza,
-          descripcion,
-        });
-
-        if (res.success) {
-          onClose();
-        } else {
-          setErrorMsg(res.error || "Error al crear la cuenta PUC");
-        }
+        setErrorMsg(res.error || `Error al ${isEditing ? "actualizar" : "crear"} la cuenta`);
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Ocurrió un error inesperado";
-      setErrorMsg(msg);
+      setErrorMsg(err instanceof Error ? err.message : "Ocurrió un error inesperado");
     } finally {
       setLoading(false);
     }
@@ -103,7 +128,6 @@ export default function ModalCrearEditarPuc({ cuentaEditar, isOpen, onClose }: P
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100 animate-in fade-in zoom-in duration-200">
-        {/* Header Modal */}
         <div className="bg-[#044a23] text-white p-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-white/10 text-[#A7D9BD]">
@@ -120,15 +144,11 @@ export default function ModalCrearEditarPuc({ cuentaEditar, isOpen, onClose }: P
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-          >
+          <button onClick={onClose} className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Body Modal / Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {errorMsg && (
             <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2.5">
@@ -137,62 +157,59 @@ export default function ModalCrearEditarPuc({ cuentaEditar, isOpen, onClose }: P
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
-            {/* Campo Código */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                Código PUC <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                disabled={isEditing}
-                placeholder="Ej. 1105, 5135"
-                value={codigo}
-                onChange={(e) => handleCodigoChange(e.target.value)}
-                className={`w-full px-3.5 py-2.5 rounded-xl text-sm border font-mono transition-all ${
-                  isEditing
-                    ? "bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed"
-                    : "border-gray-300 focus:ring-2 focus:ring-[#038C3E]/30 focus:border-[#038C3E]"
-                }`}
-              />
-            </div>
-
-            {/* Campo Nivel */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                Nivel Contable <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={nivel}
-                onChange={(e) => setNivel(Number(e.target.value))}
-                className="w-full px-3.5 py-2.5 rounded-xl text-sm border border-gray-300 focus:ring-2 focus:ring-[#038C3E]/30 focus:border-[#038C3E] bg-white transition-all"
-              >
-                <option value={1}>Nivel 1 — Clase (1 dígito)</option>
-                <option value={2}>Nivel 2 — Grupo (2 dígitos)</option>
-                <option value={3}>Nivel 3 — Cuenta (4 dígitos)</option>
-                <option value={4}>Nivel 4 — Subcuenta (6 dígitos)</option>
-                <option value={5}>Nivel 5 — Auxiliar (&gt;6 dígitos)</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Campo Nombre */}
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+              Código PUC <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              disabled={isEditing}
+              placeholder="Ej. 1105, 5135"
+              value={codigo}
+              onChange={(e) => handleCodigoChange(e.target.value)}
+              className={`w-full px-3.5 py-2.5 rounded-xl text-sm border font-mono transition-all ${
+                isEditing
+                  ? "bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed"
+                  : "border-gray-300 focus:ring-2 focus:ring-[#038C3E]/30 focus:border-[#038C3E]"
+              }`}
+            />
+          </div>
+
+          {/* Avisos Automáticos basados en el código */}
+          {codigo.length > 0 && (
+            <div className="grid grid-cols-2 gap-3 mt-2">
+              <div className="bg-blue-50/50 border border-blue-100 p-3 rounded-xl flex items-start gap-2.5">
+                <Info className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
+                <div>
+                  <div className="text-[10px] text-blue-600 font-bold uppercase tracking-wider mb-0.5">Nivel Detectado</div>
+                  <div className="text-sm font-medium text-blue-900">{getNombreNivel(nivel)}</div>
+                </div>
+              </div>
+              <div className="bg-emerald-50/50 border border-emerald-100 p-3 rounded-xl flex items-start gap-2.5">
+                <Info className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                <div>
+                  <div className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider mb-0.5">Clase de Cuenta</div>
+                  <div className="text-sm font-medium text-emerald-900">{getClasePuc(codigo)}</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 mb-1.5 mt-2">
               Nombre de la Cuenta <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               required
-              placeholder="Ej. Caja General, Gastos de Servicios Públicos"
+              placeholder="Ej. Caja General"
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl text-sm border border-gray-300 focus:ring-2 focus:ring-[#038C3E]/30 focus:border-[#038C3E] transition-all"
             />
           </div>
 
-          {/* Campo Naturaleza */}
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1.5">
               Naturaleza Contable <span className="text-red-500">*</span>
@@ -223,21 +240,18 @@ export default function ModalCrearEditarPuc({ cuentaEditar, isOpen, onClose }: P
             </div>
           </div>
 
-          {/* Campo Descripción */}
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1.5">
               Descripción / Observaciones (Opcional)
             </label>
             <textarea
               rows={3}
-              placeholder="Detalles sobre el uso o aplicación contable de esta cuenta..."
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl text-sm border border-gray-300 focus:ring-2 focus:ring-[#038C3E]/30 focus:border-[#038C3E] transition-all resize-none"
             />
           </div>
 
-          {/* Buttons Footer */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
             <button
               type="button"
