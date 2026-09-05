@@ -256,13 +256,13 @@ export default function PucTablaInteractive({ cuentasIniciales }: Props) {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50/80 border-b border-gray-200 text-[11px] uppercase font-bold text-gray-500 tracking-wider">
-                <th className="py-3.5 px-4">Código PUC</th>
-                <th className="py-3.5 px-4">Nombre de la Cuenta</th>
-                <th className="py-3.5 px-4">Clase PUC</th>
-                <th className="py-3.5 px-4">Nivel</th>
-                <th className="py-3.5 px-4">Naturaleza</th>
-                <th className="py-3.5 px-4">Descripción</th>
-                <th className="py-3.5 px-4 text-right">Acciones</th>
+                <th className="py-3.5 px-4 cursor-help" title="Código numérico estandarizado de la cuenta contable en el Plan Único de Cuentas">Código PUC</th>
+                <th className="py-3.5 px-4 cursor-help" title="Nombre oficial asignado a la cuenta contable">Nombre de la Cuenta</th>
+                <th className="py-3.5 px-4 cursor-help" title="Clase a la que pertenece (Clases 1 a 3 para Balance General, Clases 4 a 7 para Estado de Resultados)">Clase PUC</th>
+                <th className="py-3.5 px-4 cursor-help" title="Nivel jerárquico de la cuenta según la longitud del código (Clase, Grupo, Cuenta, Subcuenta, Auxiliar)">Nivel</th>
+                <th className="py-3.5 px-4 cursor-help" title="Naturaleza contable dominante de la cuenta (Débito o Crédito)">Naturaleza</th>
+                <th className="py-3.5 px-4 cursor-help" title="Detalle explicativo del uso o aplicación contable de la cuenta">Descripción</th>
+                <th className="py-3.5 px-4 text-right cursor-help" title="Opciones disponibles para editar o eliminar la cuenta PUC registrada">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-xs">

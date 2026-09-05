@@ -84,3 +84,55 @@ export const productosRelations = relations(productos, ({ one }) => ({
     references: [categoriasProductos.id],
   }),
 }));
+
+// 5. Proveedores (Consolidado)
+export const proveedores = mysqlTable("proveedores", {
+  id: serial("id").primaryKey(),
+  nit: varchar("nit", { length: 50 }).notNull().unique(),
+  razonSocial: varchar("razon_social", { length: 255 }).notNull(),
+  creadoEn: timestamp("creado_en").defaultNow().notNull(),
+});
+
+// 6. Facturas Consolidadas (Financieras)
+export const facturas = mysqlTable("facturas", {
+  id: serial("id").primaryKey(),
+  numeroFactura: varchar("numero_factura", { length: 100 }).notNull(),
+  proveedorId: int("proveedor_id").notNull(),
+  fechaEmision: timestamp("fecha_emision").notNull(),
+  totalFactura: decimal("total_factura", { precision: 12, scale: 2 }).default("0.00").notNull(),
+  categoria: mysqlEnum("categoria", ["INVENTARIO", "OPEX", "ACTIVOS"]).default("INVENTARIO").notNull(),
+  estadoPago: mysqlEnum("estado_pago", ["PAGADA", "PENDIENTE", "CREDITO_30_DIAS"]).default("PENDIENTE").notNull(),
+  creadoEn: timestamp("creado_en").defaultNow().notNull(),
+}, (table) => [
+  index("idx_facturas_proveedor").on(table.proveedorId),
+]);
+
+export const facturaItems = mysqlTable("factura_items", {
+  id: serial("id").primaryKey(),
+  facturaId: int("factura_id").notNull(),
+  descripcion: text("descripcion").notNull(),
+  cantidad: decimal("cantidad", { precision: 12, scale: 2 }).notNull(),
+  precioUnitario: decimal("precio_unitario", { precision: 12, scale: 2 }).notNull(),
+  subtotal: decimal("subtotal", { precision: 12, scale: 2 }).notNull(),
+}, (table) => [
+  index("idx_factura_items_factura_id").on(table.facturaId),
+]);
+
+export const proveedoresRelations = relations(proveedores, ({ many }) => ({
+  facturas: many(facturas),
+}));
+
+export const facturasRelations = relations(facturas, ({ one, many }) => ({
+  proveedor: one(proveedores, {
+    fields: [facturas.proveedorId],
+    references: [proveedores.id],
+  }),
+  items: many(facturaItems),
+}));
+
+export const facturaItemsRelations = relations(facturaItems, ({ one }) => ({
+  factura: one(facturas, {
+    fields: [facturaItems.facturaId],
+    references: [facturas.id],
+  }),
+}));

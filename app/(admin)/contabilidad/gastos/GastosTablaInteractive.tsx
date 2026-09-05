@@ -71,7 +71,7 @@ export function GastosTablaInteractive({
 }: GastosTablaInteractiveProps) {
   const [busqueda, setBusqueda] = useState("");
   const [filtroNaturaleza, setFiltroNaturaleza] = useState<"todas" | TipoNaturalezaFinanciera>("todas");
-  const [filtroOrigen, setFiltroOrigen] = useState<"todos" | "hermes" | "manual">("todos");
+  const [filtroOrigen, setFiltroOrigen] = useState<"todos" | "manual">("todos");
   const [filtroAudit, setFiltroAudit] = useState<"todos" | "auditados" | "originales">("todos");
   const [isPending, startTransition] = useTransition();
 
@@ -105,13 +105,7 @@ export function GastosTablaInteractive({
     }
 
     // Filtro Origen
-    const esHermes =
-      item.registradoPor?.toLowerCase().includes("hermes") ||
-      item.registradoPor?.toLowerCase().includes("bot") ||
-      item.origen?.toLowerCase().includes("hermes");
-
-    if (filtroOrigen === "hermes" && !esHermes) return false;
-    if (filtroOrigen === "manual" && esHermes) return false;
+    if (filtroOrigen === "manual" && item.registradoPor && (item.registradoPor.toLowerCase().includes("hermes") || item.origen?.toLowerCase().includes("hermes"))) return false;
 
     // Filtro Auditoría
     const tieneCorrecciones = (item.correcciones?.length || 0) > 0;
@@ -273,13 +267,12 @@ export function GastosTablaInteractive({
             <div className="flex items-center gap-1 text-xs bg-white border border-slate-200 rounded-lg px-2 py-1.5 shadow-2xs">
               <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               <select
-                value={filtroOrigen}
-                onChange={(e) => setFiltroOrigen(e.target.value as "todos" | "hermes" | "manual")}
                 className="bg-transparent font-medium text-slate-700 focus:outline-none cursor-pointer"
+                value={filtroOrigen}
+                onChange={(e) => setFiltroOrigen(e.target.value as "todos" | "manual")}
               >
-                <option value="todos">Todos los Orígenes</option>
-                <option value="hermes">Hermes Bot (IA)</option>
-                <option value="manual">Manual</option>
+                <option value="todos">Cualquier Origen</option>
+                <option value="manual">Registro Manual (Web)</option>
               </select>
             </div>
 
@@ -350,13 +343,13 @@ export function GastosTablaInteractive({
           <table className="w-full text-left text-xs text-slate-600">
             <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold uppercase tracking-wider text-[10px]">
               <tr>
-                <th className="p-4">Fecha</th>
-                <th className="p-4">Naturaleza & PUC</th>
-                <th className="p-4">Descripción & Proveedor</th>
-                <th className="p-4">Origen Captura</th>
-                <th className="p-4">Monto & Impuestos</th>
-                <th className="p-4 text-center">Auditoría</th>
-                <th className="p-4 text-right">Acciones</th>
+                <th className="p-4 cursor-help" title="Fecha oficial en la que se efectuó el pago o egreso de caja">Fecha</th>
+                <th className="p-4 cursor-help" title="Naturaleza financiera (Gasto P&G, Activo Fijo, Deuda, Retiro) y código de cuenta PUC asociado">Naturaleza & PUC</th>
+                <th className="p-4 cursor-help" title="Concepto o descripción detallada de la erogación y proveedor o beneficiario del pago">Descripción & Proveedor</th>
+                <th className="p-4 cursor-help" title="Método u origen de registro en el sistema (Captura manual de caja o procesamiento automático por agente)">Origen Captura</th>
+                <th className="p-4 cursor-help" title="Monto total desembolsado e impuestos asociados (IVA o Impoconsumo)">Monto & Impuestos</th>
+                <th className="p-4 text-center cursor-help" title="Estado de revisión y registro de auditoría de modificaciones realizadas al egreso">Auditoría</th>
+                <th className="p-4 text-right cursor-help" title="Opciones de edición del registro, ver historial de auditoría o eliminar egreso">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -368,10 +361,6 @@ export function GastosTablaInteractive({
                   descripcion: egreso.descripcion,
                 });
 
-                const esHermes =
-                  egreso.registradoPor?.toLowerCase().includes("hermes") ||
-                  egreso.registradoPor?.toLowerCase().includes("bot") ||
-                  egreso.origen?.toLowerCase().includes("hermes");
                 const correccionesList = egreso.correcciones || [];
                 const tieneCorrecciones = correccionesList.length > 0;
 
@@ -446,17 +435,10 @@ export function GastosTablaInteractive({
 
                     {/* Origen Captura */}
                     <td className="p-4 whitespace-nowrap">
-                      {esHermes ? (
-                        <Badge variant="blue" dot>
-                          <Bot className="w-3 h-3 mr-0.5" />
-                          {egreso.registradoPor || "Hermes Bot"}
-                        </Badge>
-                      ) : (
                         <Badge variant="neutral">
                           <User className="w-3 h-3 mr-0.5" />
                           {egreso.registradoPor || "Manual"}
                         </Badge>
-                      )}
                       {egreso.origen && (
                         <div className="text-[9px] text-slate-400 uppercase tracking-wide mt-0.5">
                           Vía: {egreso.origen}

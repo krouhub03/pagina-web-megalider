@@ -32,7 +32,7 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/contabilidad/facturas">
+          <Link href="/facturas/history">
             <Button variant="primary" size="sm" leftIcon={<Receipt className="w-4 h-4" />}>
               Gestionar Facturas
             </Button>
@@ -93,88 +93,10 @@ export default async function DashboardPage() {
           </div>
         </Card>
 
-        {/* Acciones de Hermes IA */}
-        <Card hoverEffect className="p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Hermes IA Bot
-            </span>
-            <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl border border-blue-100">
-              <Bot className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="text-2xl font-bold text-slate-900">
-              {metricas.egresosPorHermes}
-            </div>
-            <div className="mt-1">
-              <Badge variant="emerald" dot>
-                Registros automáticos activos
-              </Badge>
-            </div>
-          </div>
-        </Card>
-
-        {/* Estado del Sistema */}
-        <Card hoverEffect className="p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Base de Datos
-            </span>
-            <div className="p-2.5 bg-[#A7D9BD]/30 text-[#067335] rounded-xl border border-[#53A677]/30">
-              <PackageCheck className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              Sistema Contable
-              <Badge variant="emerald">Online</Badge>
-            </div>
-            <div className="text-xs text-slate-500 mt-1">
-              Conexión a Base de Datos activa
-            </div>
-          </div>
-        </Card>
       </div>
 
-      {/* Sección informativa de Hermes y Acciones Rápidas */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Panel de Supervisión de Hermes */}
-        <Card className="lg:col-span-2 p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-[#067335]/10 text-[#067335] rounded-xl border border-[#067335]/20">
-                <Bot className="w-6 h-6" />
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-slate-800">
-                  Agente Hermes IA — Estado y Trazabilidad
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Monitoreo de ingresos de facturas y gastos contables
-                </p>
-              </div>
-            </div>
-            <Link href="/hermes-logs">
-              <Button variant="ghost" size="sm" rightIcon={<ArrowUpRight className="w-3.5 h-3.5" />}>
-                Ver auditoría
-              </Button>
-            </Link>
-          </div>
-
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-600 space-y-2">
-            <p className="leading-relaxed">
-              Hermes IA registra de forma autónoma las facturas de proveedores y egresos operativos.
-              Puedes supervisar cada documento, corregir valores en caso de errores en la extracción
-              y el sistema guardará automáticamente una entrada en la tabla{" "}
-              <code className="bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded font-mono text-[11px]">
-                historial_correcciones
-              </code>{" "}
-              con el motivo y el usuario responsable.
-            </p>
-          </div>
-        </Card>
-
+      {/* Acciones Rápidas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         {/* Accesos rápidos */}
         <Card className="p-6 space-y-4">
           <h2 className="text-base font-bold text-slate-800 border-b border-slate-100 pb-3">
@@ -182,7 +104,7 @@ export default async function DashboardPage() {
           </h2>
           <div className="space-y-2.5">
             <Link
-              href="/contabilidad/facturas"
+              href="/facturas/history"
               className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:border-[#53A677]/40 hover:bg-[#A7D9BD]/10 transition-all text-xs font-semibold text-slate-700 group"
             >
               <span className="flex items-center gap-2.5">

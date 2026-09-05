@@ -163,11 +163,36 @@ export const facturasRelations = relations(facturas, ({ one, many }) => ({
     references: [proveedores.id],
   }),
   items: many(facturaItems),
+  archivos: many(facturaArchivos),
 }));
 
 export const facturaItemsRelations = relations(facturaItems, ({ one }) => ({
   factura: one(facturas, {
     fields: [facturaItems.facturaId],
+    references: [facturas.id],
+  }),
+}));
+
+export const facturaArchivos = pgTable(
+  "factura_archivos",
+  {
+    id: serial("id").primaryKey(),
+    facturaId: integer("factura_id").references(() => facturas.id, {
+      onDelete: "cascade",
+    }),
+    nombreArchivo: varchar("nombre_archivo", { length: 255 }).notNull(),
+    tipoMime: varchar("tipo_mime", { length: 100 }).notNull(),
+    datosBase64: text("datos_base64").notNull(),
+    creadoEn: timestamp("creado_en", { mode: "string" }).defaultNow(),
+  },
+  (table) => [
+    index("idx_factura_archivos_factura_id").on(table.facturaId),
+  ]
+);
+
+export const facturaArchivosRelations = relations(facturaArchivos, ({ one }) => ({
+  factura: one(facturas, {
+    fields: [facturaArchivos.facturaId],
     references: [facturas.id],
   }),
 }));
@@ -188,5 +213,35 @@ export const historialCorreccionesRelations = relations(historialCorrecciones, (
   egreso: one(egresosTienda, {
     fields: [historialCorrecciones.egresoId],
     references: [egresosTienda.id],
+  }),
+}));
+
+// 7. Facturas en Auditoría (Escaneadas por IA, pendientes de revisión)
+export const facturasAuditoria = pgTable("facturas_auditoria", {
+  id: serial("id").primaryKey(),
+  datosExtraidos: text("datos_extraidos"), // JSON crudo de la IA
+  estado: varchar("estado", { length: 50 }).default("PENDIENTE"), // PENDIENTE, REVISADO, ERROR
+  creadoEn: timestamp("creado_en", { mode: "string" }).defaultNow(),
+});
+
+export const facturasAuditoriaArchivos = pgTable("facturas_auditoria_archivos", {
+  id: serial("id").primaryKey(),
+  facturaAuditoriaId: integer("factura_auditoria_id").references(() => facturasAuditoria.id, {
+    onDelete: "cascade",
+  }),
+  datosBase64: text("datos_base64").notNull(),
+  datosBase64Censurada: text("datos_base64_censurada"), // Versión censurada físicamente si el usuario aplicó censura
+  orden: integer("orden").default(0), // Para mantener el orden de las páginas
+  creadoEn: timestamp("creado_en", { mode: "string" }).defaultNow(),
+});
+
+export const facturasAuditoriaRelations = relations(facturasAuditoria, ({ many }) => ({
+  archivos: many(facturasAuditoriaArchivos),
+}));
+
+export const facturasAuditoriaArchivosRelations = relations(facturasAuditoriaArchivos, ({ one }) => ({
+  factura: one(facturasAuditoria, {
+    fields: [facturasAuditoriaArchivos.facturaAuditoriaId],
+    references: [facturasAuditoria.id],
   }),
 }));

@@ -423,12 +423,12 @@ export default function UsersManager({
             <table className="w-full text-left text-xs text-slate-600">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold uppercase tracking-wider text-[10px]">
                 <tr>
-                  <th className="p-4">Usuario</th>
-                  <th className="p-4">Tipo de Cuenta</th>
-                  <th className="p-4">Rol Asignado</th>
-                  <th className="p-4">Estado</th>
-                  <th className="p-4">Fecha de Registro</th>
-                  <th className="p-4 text-right">Acciones</th>
+                  <th className="p-4 cursor-help" title="Nombre completo y dirección de correo electrónico del usuario registrado">Usuario</th>
+                  <th className="p-4 cursor-help" title="Método de acceso utilizado por la cuenta (Credenciales con contraseña o Google OAuth 2.0)">Tipo de Cuenta</th>
+                  <th className="p-4 cursor-help" title="Rol de permisos asignado en el sistema (SUPERADMIN, ADMIN, VENDEDOR o CLIENTE)">Rol Asignado</th>
+                  <th className="p-4 cursor-help" title="Estado de la cuenta (Activa para ingresar o Inactiva / Suspendida)">Estado</th>
+                  <th className="p-4 cursor-help" title="Fecha y hora en la que el usuario creó su cuenta en la plataforma">Fecha de Registro</th>
+                  <th className="p-4 text-right cursor-help" title="Opciones para editar el rol asignado o modificar el estado de acceso del usuario">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

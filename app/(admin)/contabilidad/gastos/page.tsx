@@ -38,13 +38,6 @@ export default async function GastosPage() {
   const categorias = categoriasRes.data || [];
   const pucCuentas = pucRes.data || [];
 
-  const egresosHermesCount = egresos.filter(
-    (e) =>
-      e.registradoPor?.toLowerCase().includes("hermes") ||
-      e.registradoPor?.toLowerCase().includes("bot") ||
-      e.origen?.toLowerCase().includes("hermes")
-  ).length;
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -133,35 +126,28 @@ export default async function GastosPage() {
           </div>
         </Card>
 
-        {/* Metric 4: Trazabilidad Hermes IA & Impuestos */}
+        {/* Metric 4: Impuestos y Retenciones */}
         <Card className="p-4 bg-white border border-slate-200">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Hermes IA & Impuestos
+              Desglose de Impuestos
             </span>
-            <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
-              <Bot className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+              <Receipt className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-2 flex items-baseline justify-between">
-            <div>
-              <span className="text-xl font-bold text-slate-900">
-                {egresosHermesCount}
-              </span>
-              <span className="text-xs text-blue-600 font-semibold ml-1 inline-flex items-center">
-                <ArrowUpRight className="w-3 h-3" />
-                {egresos.length > 0 ? Math.round((egresosHermesCount / egresos.length) * 100) : 0}%
-              </span>
+          <div className="mt-2 space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-slate-600">IVA Descontable:</span>
+              <span className="text-sm font-bold text-slate-900">{formatCurrency(metricas.totalIvaDescontable)}</span>
             </div>
-            <div className="text-right">
-              <span className="text-[11px] font-semibold text-slate-700 block">
-                IVA: {formatCurrency(metricas.totalIvaDescontable)}
-              </span>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-slate-600">Impoconsumo (ICO):</span>
+              <span className="text-sm font-bold text-slate-900">{formatCurrency(metricas.totalOtrosImpuestos)}</span>
             </div>
           </div>
-          <div className="mt-1 text-[11px] text-slate-500 flex items-center gap-1">
-            <Receipt className="w-3 h-3 text-slate-400" />
-            <span>Impoconsumo acumulado: {formatCurrency(metricas.totalOtrosImpuestos)}</span>
+          <div className="mt-2 text-[11px] text-emerald-700 font-medium border-t pt-1.5 border-emerald-50">
+            Valores fiscales extraídos
           </div>
         </Card>
       </div>

@@ -13,6 +13,9 @@ import {
   ExternalLink,
   ChevronRight,
   BookOpen,
+  ScanLine,
+  ClipboardCheck,
+  PackageSearch
 } from "lucide-react";
 
 interface NavItem {
@@ -35,19 +38,28 @@ interface NavSection {
 
 const navSections: NavSection[] = [
   {
-    title: "Agente",
+    title: "IA & Facturas",
     items: [
       {
-        name: "Auditoría Hermes IA",
-        href: "/hermes-logs",
-        icon: Bot,
-        badge: "Activo",
+        name: "Escanear Factura",
+        href: "/facturas/scan",
+        icon: ScanLine,
       },
       {
-        name: "Facturas de Compra",
-        href: "/contabilidad/facturas",
+        name: "Auditoría Pendiente",
+        href: "/facturas/audit",
+        icon: ClipboardCheck,
+      },
+      {
+        name: "Historial de Facturas",
+        href: "/facturas/history",
         icon: Receipt,
       },
+    ],
+  },
+  {
+    title: "Contabilidad",
+    items: [
       {
         name: "Egresos y Gastos",
         href: "/contabilidad/gastos",
@@ -61,8 +73,13 @@ const navSections: NavSection[] = [
     ],
   },
   {
-    title: "Web",
+    title: "Tienda y Web",
     items: [
+      {
+        name: "Catálogo",
+        href: "/catalogo",
+        icon: PackageSearch,
+      },
       {
         name: "Usuarios y Roles",
         href: "/usuarios",

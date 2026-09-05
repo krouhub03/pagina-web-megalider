@@ -28,6 +28,7 @@ export async function getFacturas(filtros: FiltrosFacturas = {}) {
       with: {
         proveedor: true,
         items: true,
+        archivos: true,
       },
       limit: filtros.limit ?? 50,
       offset: filtros.offset ?? 0,
@@ -48,6 +49,7 @@ export async function getFacturaDetalle(facturaId: number) {
       with: {
         proveedor: true,
         items: true,
+        archivos: true,
       },
     });
     return { success: true, data };
@@ -100,6 +102,80 @@ export async function actualizarFactura(facturaId: number, datos: ActualizarFact
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Error desconocido";
     console.error(`Error al actualizar factura #${facturaId}:`, error);
+    return { success: false, error: message };
+  }
+}
+
+export interface CrearFacturaCompletaInput {
+  factura: ActualizarFacturaInput & { proveedorId?: number; nitProveedor?: string; razonSocialProveedor?: string };
+  items: FacturaItemInput[];
+  archivo?: {
+    nombreArchivo: string;
+    tipoMime: string;
+    datosBase64: string;
+  };
+}
+
+export async function crearFacturaCompleta(datos: CrearFacturaCompletaInput) {
+  try {
+    return await dbPostgres.transaction(async (tx) => {
+      let proveedorId = datos.factura.proveedorId;
+
+      // Si no hay proveedorId pero hay NIT, buscar o crear proveedor
+      if (!proveedorId && datos.factura.nitProveedor && datos.factura.razonSocialProveedor) {
+        const provs = await tx.select().from(schema.proveedores).where(eq(schema.proveedores.nit, datos.factura.nitProveedor));
+        if (provs.length > 0) {
+          proveedorId = provs[0].id;
+        } else {
+          const [nuevoProv] = await tx.insert(schema.proveedores).values({
+            nit: datos.factura.nitProveedor,
+            razonSocial: datos.factura.razonSocialProveedor,
+          }).returning();
+          proveedorId = nuevoProv.id;
+        }
+      }
+
+      // Crear factura
+      const [nuevaFactura] = await tx.insert(schema.facturas).values({
+        numeroFactura: datos.factura.numeroFactura || `F-${Date.now()}`,
+        fechaEmision: datos.factura.fechaEmision || new Date().toISOString().split('T')[0],
+        proveedorId,
+        subtotal: datos.factura.subtotal || "0",
+        iva: datos.factura.iva || "0",
+        impoconsumo: datos.factura.impoconsumo || "0",
+        totalFactura: datos.factura.totalFactura || "0",
+      }).returning();
+
+      // Crear ítems
+      if (datos.items && datos.items.length > 0) {
+        await tx.insert(schema.facturaItems).values(
+          datos.items.map(item => ({
+            facturaId: nuevaFactura.id,
+            descripcion: item.descripcion,
+            cantidadIngresada: item.cantidadIngresada,
+            costoUnitarioCompra: item.costoUnitarioCompra,
+            costoTotalLinea: item.costoTotalLinea,
+            ivaTotal: item.ivaTotal,
+            porcentajeIva: item.porcentajeIva,
+          }))
+        );
+      }
+
+      // Guardar archivo si existe
+      if (datos.archivo) {
+        await tx.insert(schema.facturaArchivos).values({
+          facturaId: nuevaFactura.id,
+          nombreArchivo: datos.archivo.nombreArchivo,
+          tipoMime: datos.archivo.tipoMime,
+          datosBase64: datos.archivo.datosBase64,
+        });
+      }
+
+      return { success: true, data: nuevaFactura };
+    });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
+    console.error("Error al crear factura completa:", error);
     return { success: false, error: message };
   }
 }

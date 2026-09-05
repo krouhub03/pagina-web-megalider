@@ -43,3 +43,8 @@ Esta skill contiene la guía oficial de marca, paleta de colores y principios vi
    - **PROHIBICIÓN STRICTA:** NUNCA mostrar nombres de motores de bases de datos, librerías o jerga de desarrollo (`PostgreSQL`, `MySQL`, `Drizzle`, `ORM`, `BFF`, `API`, `JSON`, etc.) en elementos visuales de la interfaz de usuario (UI), páginas, modales, badges, tarjetas o mensajes del sistema.
    - **LENGUAJE DE NEGOCIO:** Reemplazar por expresiones funcionales orientadas al usuario (ej. *"Sistema Contable"*, *"Catálogo Sincronizado en Vivo"*, *"Sistema de Inventario"*, *"Registro de Operaciones"*).
 
+6. **Estándar Obligatorio para Cabeceras de Tablas (Tooltip con Puntero de Ayuda)**:
+   - **REGLA OBLIGATORIA:** TODA celda de encabezado de tabla (`<th className="... cursor-help" title="...">`) DEBE incluir la clase CSS `cursor-help` (puntero con signo de interrogación `?`) y un atributo `title="..."` explicativo con lenguaje claro para el usuario.
+   - **PROPÓSITO:** Brindar auto-explicación contextual inmediata en cada columna sin saturar la pantalla.
+
+
